@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DLA Pro - Simulador Lógico v11</title>
+<style>
+:root {
+  --bg: #0f172a;
+  --card: #1e293b;
+  --panel: #0f172a;
+  --ink: #f8fafc;
+  --muted: #94a3b8;
+  --border: #334155;
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --good: #10b981;
+  --bad: #ef4444;
+  --warning: #f59e0b;
+  --class: #8b5cf6;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'Inter', system-ui, sans-serif; line-height: 1.6; }
+header { background: linear-gradient(135deg, #1e3a8a, #3b82f6); padding: 25px 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+.wrap { max-width: 1200px; margin: auto; }
+header h1 { margin: 0; font-size: 28px; font-weight: 800; }
+header p { margin: 5px 0 0; color: #cbd5e1; }
+.stats { display: flex; gap: 15px; margin-top: 15px; }
+.stat { background: rgba(255,255,255,0.1); padding: 8px 15px; border-radius: 8px; font-size: 14px; font-weight: 600; backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2); }
+main { max-width: 1200px; margin: 30px auto; padding: 0 20px; display: grid; grid-template-columns: 300px 1fr; gap: 25px; }
+.panel, .work { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+h2, h3 { margin-top: 0; color: #f1f5f9; }
+label { display: block; font-size: 13px; font-weight: 700; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+.vars-details { margin-top:15px; border-top:1px solid var(--border); padding-top:10px; }
+.vars-details summary { display:list-item; cursor:pointer; color:var(--muted); font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; padding:4px 0; }
+.vars-details summary:hover { color:var(--ink); }
+.vars-details summary:focus-visible { outline:3px solid rgba(96,165,250,.7); outline-offset:3px; border-radius:4px; }
+.vars-details #varsContainer { padding:8px 0 2px; }
+select, button, input { width: 100%; font: inherit; }
+select { padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--panel); color: var(--ink); margin-bottom: 20px; outline: none; }
+select:focus, input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(59,130,246,0.3); }
+input[type="text"] { padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--ink); outline: none; }
+button { border: none; border-radius: 8px; padding: 12px 20px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.primary { background: var(--accent); color: white; }
+.primary:hover { background: var(--accent-hover); }
+.ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+.ghost:hover { background: var(--border); color: white; }
+.btnrow { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
+.btnrow button { width: auto; flex: 1; }
+.pill { display: inline-block; background: #1e3a8a; color: #bfdbfe; border-radius: 99px; padding: 4px 12px; font-size: 12px; font-weight: 700; margin-left: 10px; }
+.statement { background: var(--panel); border: 1px solid var(--border); padding: 18px; border-radius: 8px; margin-bottom: 20px; }
+textarea { width: 100%; min-height: 350px; background: #020617; color: #38bdf8; border: 1px solid var(--border); border-radius: 8px; padding: 18px; font-family: "Consolas", "Monaco", monospace; font-size: 15px; resize: vertical; outline: none; tab-size: 4; }
+.feedback { padding: 15px; border-radius: 8px; margin-top: 20px; font-weight: 500; white-space: pre-wrap; }
+.good { background: rgba(16, 185, 129, 0.1); color: var(--good); border: 1px solid rgba(16,185,129,0.3); }
+.bad { background: rgba(239, 68, 68, 0.1); color: var(--bad); border: 1px solid rgba(239,68,68,0.3); }
+.neutral { background: rgba(148, 163, 184, 0.1); color: #cbd5e1; border: 1px solid rgba(148,163,184,0.3); }
+.warning { background: rgba(245, 158, 11, 0.1); color: var(--warning); border: 1px solid rgba(245,158,11,0.3); }
+.testcase { background: var(--panel); border: 1px solid var(--border); padding: 15px; border-radius: 8px; margin-top: 10px; font-family: monospace; font-size: 13px; }
+ul { padding-left: 20px; color: var(--muted); font-size: 14px; }
+li { margin-bottom: 8px; }
+code { color: #818cf8; background: rgba(129,140,248,0.1); padding: 2px 6px; border-radius: 4px; }
+button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid rgba(96,165,250,.7); outline-offset: 2px; }
+.runtime-panel { margin-top:24px; padding:18px; border:1px solid rgba(16,185,129,.45); border-radius:12px; background:rgba(15,23,42,.72); }
+.runtime-panel h3 { margin-bottom:4px; }
+.runtime-help { color:var(--muted); margin:0 0 12px; font-size:14px; }
+.runtime-output { min-height:80px; max-height:260px; overflow:auto; white-space:pre-wrap; overflow-wrap:anywhere; padding:14px; margin:14px 0 0; border-radius:8px; border:1px solid var(--border); background:#020617; color:#a7f3d0; font:14px/1.6 Consolas,monospace; }
+.runtime-panel input { padding:10px; border:1px solid var(--border); border-radius:8px; background:var(--bg); color:var(--ink); }
+.field-help { display:block; margin-top:5px; color:var(--muted); font-size:12px; line-height:1.4; }
+.task-list-panel { margin: 18px 0; padding: 14px; border: 1px solid var(--border); border-radius: 10px; background: rgba(15,23,42,.55); }
+.task-list-panel h3 { margin: 0 0 4px; font-size: 16px; }
+.task-list-summary { margin: 0 0 10px; color: var(--muted); font-size: 12px; }
+.task-list { display: grid; gap: 7px; max-height: 340px; overflow-y: auto; }
+.task-list-item { display: flex; align-items: center; gap: 8px; text-align: left; padding: 9px 10px; background: #172338; border: 1px solid var(--border); color: var(--ink); font-size: 12px; line-height: 1.4; }
+.task-list-item:hover { background: #26364d; }
+.task-list-item.is-current { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.task-list-item.is-solved .task-list-status { color: var(--good); }
+.task-list-status { flex: 0 0 auto; color: var(--muted); font-weight: 800; }
+.task-list-name { flex: 1; }
+@media(max-width: 800px) { .task-list { max-height: 260px; } }
+.desktop-panel { margin-top:24px; padding:18px; border:1px solid var(--border); border-radius:12px; background:var(--panel); }
+.desktop-panel h3 { margin-bottom:6px; }
+.desk-instructions { margin:0 0 14px; color:var(--muted); font-size:14px; }
+.desk-code-container { margin:14px 0; }
+.desk-code { max-height:300px; overflow:auto; white-space:pre-wrap; padding:14px; border:1px solid var(--border); border-radius:8px; background:#020617; color:#a5f3fc; font:13px/1.5 Consolas,monospace; }
+.desk-input-area { max-width:560px; }
+.desk-input-area input { padding:10px; margin:0; border:1px solid var(--border); border-radius:8px; background:#020617; color:var(--ink); }
+.desk-actions { margin:12px 0; }
+.desk-actions button { width:auto; }
+.desk-table-scroll { overflow:auto; max-width:100%; margin-top:14px; border:1px solid var(--border); border-radius:8px; background:#fff; }
+.desk-table { width:100%; min-width:1050px; border-collapse:collapse; color:#111827; font:13px/1.35 Arial,sans-serif; }
+.desk-table th,.desk-table td { border:1px solid #64748b; padding:0; text-align:center; }
+.desk-table th { padding:9px 6px; background:#e2e8f0; color:#0f172a; }
+.desk-table th small { font-weight:400; }
+.desk-table td { min-width:84px; height:38px; background:#fff; }
+.desk-table td:first-child { min-width:74px; background:#f8fafc; }
+.desk-table td[contenteditable="true"] { outline:none; }
+.desk-table td[contenteditable="true"]:focus { background:#eff6ff; box-shadow:inset 0 0 0 2px #3b82f6; }
+@media(max-width:520px) { .desktop-panel { padding:12px; } .desk-actions { display:grid; grid-template-columns:1fr; } .desk-actions button { width:100%; } }
+@media(max-width: 800px) { main { grid-template-columns: 1fr; margin-top: 18px; } .beginner-panel { grid-column:1; } .stats { flex-wrap: wrap; } .panel, .work { padding: 18px; } }
+@media(max-width: 520px) { header { padding: 20px 16px; } header h1 { font-size: 23px; } main { padding: 0 12px; } .btnrow { display: grid; grid-template-columns: 1fr 1fr; } .btnrow button { width: 100%; } textarea { min-height: 280px; padding: 12px; font-size: 14px; } }
+.beginner-panel { grid-column:2; }
+@media(max-width:800px) { .beginner-panel { grid-column:1; } }
+.beginner-heading { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; }
+.quiz-toolbar { display:flex; gap:14px; align-items:center; margin:22px 0 14px; flex-wrap:wrap; }
+.quiz-toolbar label { margin:0; }
+.quiz-toolbar select { width:auto; min-width:220px; margin:0; }
+.quiz-progress { color:var(--muted); margin-left:auto; }
+.quiz-card { padding:22px; border:1px solid var(--border); border-radius:14px; background:var(--bg); }
+.quiz-kind { color:var(--accent); font-size:13px; text-transform:uppercase; font-weight:800; letter-spacing:.07em; }
+.quiz-card h3 { margin:10px 0 18px; font-size:20px; }
+.quiz-code { padding:14px; border-radius:9px; background:#020617; color:#a5f3fc; font:14px/1.6 Consolas,monospace; white-space:pre-wrap; margin-bottom:16px; }
+.quiz-choices { display:grid; gap:10px; }
+.quiz-choice { padding:13px 15px; border:1px solid var(--border); border-radius:9px; cursor:pointer; background:var(--panel); }
+.quiz-choice:hover { border-color:var(--accent); }
+.quiz-choice input { width:auto; margin:0 10px 0 0; }
+.quiz-actions { display:flex; gap:10px; margin-top:18px; }
+.quiz-actions button { width:auto; }
+.quiz-learning { margin-top:18px; padding:16px; border-left:3px solid var(--accent); color:var(--muted); background:var(--panel); border-radius:8px; }
+.desk-table th.memory-column { min-width:86px; }
+@media(max-width:520px) { .beginner-heading button { width:100%; } .quiz-toolbar select { width:100%; } .quiz-progress { margin-left:0; } .quiz-card { padding:15px; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>🚀 DLA Pro <span style="font-weight:400; font-size: 20px;">| Simulador Lógico v11</span></h1>
+    <p>114 retos, funciones, práctica para principiantes y prueba de escritorio.</p>
+    <div class="stats">
+      <div class="stat">⭐ Puntos: <span id="points">0</span></div>
+      <div class="stat">✅ Dominados: <span id="solved">0</span></div>
+    </div>
+  </div>
+</header>
+<main>
+  <aside class="panel">
+    <h2>Configuración</h2>
+    <button class="primary" id="beginnerMode" style="width:100%; margin-bottom:14px;">🧠 Modo preguntas · Empieza desde cero</button>
+    <label>Nivel de Dificultad</label>
+    <select id="level">
+      <option value="clase">🎓 MODO CLASE (Problema Libre)</option>
+      <option value="1">Nivel 1: Variables y Operaciones</option>
+      <option value="2">Nivel 2: Condicionales (si / de otro modo)</option>
+      <option value="3">Nivel 3: Condiciones Lógicas (&&, ||)</option>
+      <option value="4">Nivel 4: Ciclos (para)</option>
+      <option value="5">Nivel 5: Retos Completos</option>
+      <option value="6">Nivel 6: Funciones y retorno</option>
+    </select>
+    <button class="primary" id="newTask" style="margin-bottom: 10px;">🎲 Generar Nuevo Reto</button>
+    <button class="ghost" id="resetProgress" style="margin-bottom: 14px;">🔄 Reiniciar Progreso</button>
+    <section class="task-list-panel" id="taskListPanel" aria-label="Retos del nivel">
+      <h3 id="taskListTitle">Retos del nivel</h3>
+      <p id="taskListSummary" class="task-list-summary"></p>
+      <div id="taskList" class="task-list"></div>
+    </section>
+    <div class="statement" style="font-size: 13px; margin-bottom: 0;">
+      <label>Guía del pseudocódigo</label>
+      <ul>
+        <li>Usa llaves <code>{ }</code>, sin inicio/final.</li>
+        <li>Tipos: <code>entero, flotante, cadena, caracter, logico</code>.</li>
+        <li>Palabras clave: <code>si, de otro modo si, de otro modo, para, imprimir, leer</code>.</li>
+        <li>Si quieres, muestra una pregunta con <code>imprimir()</code> antes de cada <code>leer()</code>; el texto del mensaje no afecta la evaluación.</li>
+        <li>La evaluación se centra en la lógica; permite mensajes equivalentes y reordena entradas de distinto tipo cuando puede identificarlas.</li>
+        <li>Funciones: <code>flotante Nombre(entero dato) { ... retornar resultado; }</code>.</li>
+        <li>Llamada: <code>resultado = Nombre(valor);</code>. Los parámetros se reciben por posición.</li>
+        <li>Operadores lógicos: <code>&amp;&amp;</code> (y), <code>||</code> (o), <code>!</code> (no).</li>
+        <li>Bloques: <code>//Bloque declarativo de variables</code> y <code>//Bloque de instrucciones</code>.</li>
+      </ul>
+    </div>
+  </aside>
+  <section class="work">
+    <div style="display: flex; align-items: center; margin-bottom: 15px;">
+      <h2 id="taskTitle" style="margin: 0;">Cargando...</h2>
+      <span class="pill" id="taskBadge" style="background: var(--class); color: #fff;">Modo Libre</span>
+    </div>
+    <div class="statement">
+      <label id="lblStatement">Misión Lógica</label>
+      <div id="statementContainer" style="font-size: 15px;"></div>
+      <details class="vars-details" id="varsDetails">
+        <summary id="lblVars">Variables Sugeridas</summary>
+        <div id="varsContainer" style="color: #60a5fa; font-family: monospace;"></div>
+      </details>
+    </div>
+    <label for="activityMode">Modo de práctica</label>
+    <select id="activityMode" style="margin-bottom:14px;">
+      <option value="code">Resolver el problema</option>
+      
+      <option value="codeTrace">Escribir mi algoritmo + prueba de escritorio</option>
+    </select>
+    <label id="codeLabel">Consola de Código</label>
+    <textarea id="answer" spellcheck="false" placeholder="//Bloque declarativo de variables&#10;entero numero;&#10;&#10;//Bloque de instrucciones&#10;imprimir(&quot;Ingrese un número:&quot;);&#10;leer(numero);"></textarea>
+    
+    <div class="btnrow" id="codeActions">
+      <button class="primary" id="check">⚡ Ejecutar y Evaluar</button>
+      <button class="ghost" id="hint">💡 Pista</button>
+      <button class="warning" id="analyze" style="background: var(--warning); color: #fff;">🔍 Analizar Error</button>
+      <button class="ghost" id="solution">👀 Ver Solución</button>
+      <button class="ghost" id="clearAnswer" style="display:none;">🗑 Borrar respuesta guardada</button>
+    </div>
+    
+    <div id="feedback" class="feedback neutral">Escribe tu pseudocódigo y presiona Ejecutar. Si te trabas, usa Analizar Error.</div>
+    <div id="testsBox" style="margin-top: 20px;"></div>
+    <section id="runtimePanel" class="runtime-panel" style="display:none;">
+      <h3>Consola de ejecución</h3>
+      <p class="runtime-help">Tu solución pasó las pruebas del reto. Selecciona un caso del problema o introduce tus propios valores y vuelve a ejecutarla.</p>
+      <label for="runtimeCase">Caso de prueba</label>
+      <select id="runtimeCase" style="margin-bottom:12px;"></select>
+      <label for="runtimeInputs">Entradas (separadas por coma, en el orden de lectura del algoritmo)</label>
+      <input id="runtimeInputs" type="text" placeholder="Ejemplo: 40, 12.5" autocomplete="off">
+      <button class="primary" id="runRuntime" style="margin-top:12px; width:auto;">▶ Ejecutar</button>
+      <pre id="runtimeOutput" class="runtime-output" aria-live="polite">La salida del algoritmo aparecerá aquí.</pre>
+    </section>
+    <section id="desktopPanel" class="desktop-panel" style="display:none;">
+      <h3>Prueba de escritorio (PD)</h3>
+      <p class="desk-instructions">Ejecuta tu algoritmo para crear una guía de escritorio. Las columnas de memoria se ajustan a las variables declaradas; los signos ? marcan valores que aún debes determinar. Puedes editar cada celda. En cada leer(), Pantalla mostrará el valor ingresado con ↵ para indicar Enter.</p>
+      <div id="deskCodeContainer" class="desk-code-container" style="display:none;">
+        <label>Algoritmo que vas a seguir</label>
+        <pre id="deskCodePreview" class="desk-code"></pre>
+      </div>
+      <div id="deskInputsArea" class="desk-input-area">
+        <label for="deskInputs">Datos de entrada para la prueba</label>
+        <select id="deskCase" style="display:none;"></select>
+        <input id="deskInputs" type="text" placeholder="Valores separados por coma, en el orden en que se leen" autocomplete="off">
+      </div>
+      <div class="btnrow desk-actions">
+        <button class="primary" id="prepareDesk">▶ Ejecutar y preparar mi PD</button>
+        <button class="ghost" id="addDeskRow">＋ Agregar renglón</button>
+        <button class="ghost" id="clearDesk">Borrar mi tabla</button>
+      </div>
+      <div id="deskFeedback" class="feedback neutral">Escribe tu algoritmo y los datos. La tabla mostrará solo las variables declaradas y dejará ? donde el valor todavía no se conoce.</div>
+      <div class="desk-table-scroll">
+        <table class="desk-table">
+          <thead id="deskHead"></thead>
+          <tbody id="deskBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+  <section class="work beginner-panel" id="beginnerPanel" style="display:none;">
+    <div class="beginner-heading"><div><span class="pill" style="background:var(--class);color:#fff;">Ruta para principiantes</span><h2 style="margin:12px 0 4px;">Aprende lógica paso a paso</h2><p class="muted">Lee una pregunta, responde y revisa por qué. Puedes cambiar de tema cuando quieras.</p></div><button class="ghost" id="exitBeginner">← Volver a los retos</button></div>
+    <div class="quiz-toolbar"><label for="quizTopic">Tema</label><select id="quizTopic"><option value="all">Todos los temas</option><option value="basics">Variables y tipos</option><option value="input">Entrada y salida</option><option value="condition">Condiciones</option><option value="logic">Lógica y algoritmos</option><option value="repair">Corrige el código</option><option value="complete">Completa el código</option></select><span id="quizProgress" class="quiz-progress"></span></div>
+    <article class="quiz-card"><div id="quizKind" class="quiz-kind"></div><h3 id="quizQuestion"></h3><div id="quizCode" class="quiz-code" style="display:none;"></div><div id="quizChoices" class="quiz-choices"></div><div id="quizFeedback" class="feedback neutral" style="display:none;"></div><div class="quiz-actions"><button class="primary" id="submitQuiz">Comprobar respuesta</button><button class="ghost" id="nextQuiz" style="display:none;">Siguiente pregunta →</button></div></article>
+    <div id="quizLearning" class="quiz-learning"><b>Consejo:</b> identifica primero los datos de entrada, luego las operaciones y condiciones, y finalmente la salida que pide el enunciado.</div>
+  </section>
+</main>
+<script>
+// BASE DE DATOS: 114 PROBLEMAS (70 originales + 25 nuevos + 19 de funciones)
+const tasks = [
+// NIVEL 1: Variables y Operaciones (1-10)
+{id:1, l:1, title:'Calcular Promedio', statement:'Lee tres notas (flotantes) y calcula el promedio. Imprime el resultado.', vars:'flotante nota1, nota2, nota3, promedio', hint:'promedio = (nota1 + nota2 + nota3) / 3', solution:'Algoritmo Promedio\n{\n    //Bloque declarativo de variables\n    flotante nota1, nota2, nota3, promedio;\n    //Bloque de instrucciones\n    leer(nota1);\n    leer(nota2);\n    leer(nota3);\n    promedio = (nota1 + nota2 + nota3) / 3;\n    imprimir(promedio);\n}', tests:[{in:[80,90,100], out:['90']}]},
+{id:2, l:1, title:'Cálculo de Salario', statement:'Lee el número de horas trabajadas y el pago por hora. Calcula e imprime el salario total.', vars:'entero horas; flotante pago, salario', hint:'salario = horas * pago', solution:'Algoritmo Salario\n{\n    //Bloque declarativo de variables\n    entero horas;\n    flotante pago, salario;\n    //Bloque de instrucciones\n    leer(horas);\n    leer(pago);\n    salario = horas * pago;\n    imprimir(salario);\n}', tests:[{in:[40, 5], out:['200']}]},
+{id:3, l:1, title:'Área de un Triángulo', statement:'Lee la base y la altura de un triángulo. Calcula su área (base * altura / 2) e imprímela.', vars:'flotante base, altura, area', hint:'Multiplica base por altura y divide entre 2.', solution:'Algoritmo AreaTriangulo\n{\n    //Bloque declarativo de variables\n    flotante base, altura, area;\n    //Bloque de instrucciones\n    leer(base);\n    leer(altura);\n    area = (base * altura) / 2;\n    imprimir(area);\n}', tests:[{in:[10, 5], out:['25']}, {in:[8, 4], out:['16']}]},
+{id:4, l:1, title:'Grados Celsius a Fahrenheit', statement:'Lee una temperatura en grados Celsius y conviértela a Fahrenheit. (F = C * 1.8 + 32). Imprime el resultado.', vars:'flotante celsius, fahrenheit', hint:'Usa fahrenheit = celsius * 1.8 + 32', solution:'Algoritmo Temperatura\n{\n    //Bloque declarativo de variables\n    flotante celsius, fahrenheit;\n    //Bloque de instrucciones\n    leer(celsius);\n    fahrenheit = (celsius * 1.8) + 32;\n    imprimir(fahrenheit);\n}', tests:[{in:[20], out:['68']}, {in:[0], out:['32']}]},
+{id:5, l:1, title:'Perímetro de Rectángulo', statement:'Lee la base y altura de un rectángulo. Calcula su perímetro (2 veces la base + 2 veces la altura) e imprímelo.', vars:'flotante base, altura, perimetro', hint:'perimetro = (2 * base) + (2 * altura)', solution:'Algoritmo Perimetro\n{\n    //Bloque declarativo de variables\n    flotante base, altura, perimetro;\n    //Bloque de instrucciones\n    leer(base);\n    leer(altura);\n    perimetro = (2 * base) + (2 * altura);\n    imprimir(perimetro);\n}', tests:[{in:[5, 10], out:['30']}]},
+{id:6, l:1, title:'Precio con ITBMS', statement:'Lee el precio base de un producto. Calcula el 7% de ITBMS y súmaselo al precio para obtener el total. Imprime el total.', vars:'flotante precio, total', hint:'total = precio + (precio * 0.07)', solution:'Algoritmo ITBMS\n{\n    //Bloque declarativo de variables\n    flotante precio, total;\n    //Bloque de instrucciones\n    leer(precio);\n    total = precio + (precio * 0.07);\n    imprimir(total);\n}', tests:[{in:[100], out:['107']}, {in:[50], out:['53.5']}]},
+{id:7, l:1, title:'Años a Días', statement:'Lee una cantidad de años enteros. Calcula cuántos días hay en esos años (multiplicando por 365) e imprime el resultado.', vars:'entero anos, dias', hint:'dias = anos * 365', solution:'Algoritmo AnosADias\n{\n    //Bloque declarativo de variables\n    entero anos, dias;\n    //Bloque de instrucciones\n    leer(anos);\n    dias = anos * 365;\n    imprimir(dias);\n}', tests:[{in:[2], out:['730']}]},
+{id:8, l:1, title:'Distancia Recorrida', statement:'Lee la velocidad de un auto (km/h) y el tiempo de viaje (horas). Calcula e imprime la distancia (velocidad * tiempo).', vars:'flotante velocidad, tiempo, distancia', hint:'distancia = velocidad * tiempo', solution:'Algoritmo Distancia\n{\n    //Bloque declarativo de variables\n    flotante velocidad, tiempo, distancia;\n    //Bloque de instrucciones\n    leer(velocidad);\n    leer(tiempo);\n    distancia = velocidad * tiempo;\n    imprimir(distancia);\n}', tests:[{in:[60, 2], out:['120']}]},
+{id:9, l:1, title:'Repartir Dulces', statement:'Lee la cantidad de dulces y la cantidad de niños. Calcula cuántos dulces enteros le tocan a cada niño (división). Imprime el resultado.', vars:'entero dulces, ninos, tocados', hint:'Usa tocados = dulces / ninos', solution:'Algoritmo Repartir\n{\n    //Bloque declarativo de variables\n    entero dulces, ninos, tocados;\n    //Bloque de instrucciones\n    leer(dulces);\n    leer(ninos);\n    tocados = dulces / ninos;\n    imprimir(tocados);\n}', tests:[{in:[20, 5], out:['4']}]},
+{id:10, l:1, title:'Diferencia de Edades', statement:'Lee dos edades e imprime la diferencia (resta la edad 1 menos la edad 2). Asume que la edad 1 siempre será mayor.', vars:'entero edad1, edad2, diferencia', hint:'diferencia = edad1 - edad2', solution:'Algoritmo Edades\n{\n    //Bloque declarativo de variables\n    entero edad1, edad2, diferencia;\n    //Bloque de instrucciones\n    leer(edad1);\n    leer(edad2);\n    diferencia = edad1 - edad2;\n    imprimir(diferencia);\n}', tests:[{in:[25, 10], out:['15']}]},
+
+// NIVEL 2: Condicionales Simples (11-20)
+{id:11, l:2, title:'Aprobado o Reprobado', statement:'Lee una nota. Si es mayor o igual a 71, imprime "Aprobado", de otro modo imprime "Reprobado".', vars:'flotante nota', hint:'si(nota >= 71) { ... } de otro modo { ... }', solution:'Algoritmo ValidarNota\n{\n    //Bloque declarativo de variables\n    flotante nota;\n    //Bloque de instrucciones\n    leer(nota);\n    si(nota >= 71) {\n        imprimir("Aprobado");\n    } de otro modo {\n        imprimir("Reprobado");\n    }\n}', tests:[{in:[75], out:['Aprobado']}, {in:[70], out:['Reprobado']}]},
+{id:12, l:2, title:'Validación de Número Par', statement:'Lee un número. Si el residuo de dividirlo entre 2 es 0, imprime "Par", de otro modo "Impar".', vars:'entero numero', hint:'si(numero % 2 == 0)', solution:'Algoritmo ValidarPar\n{\n    //Bloque declarativo de variables\n    entero numero;\n    //Bloque de instrucciones\n    leer(numero);\n    si(numero % 2 == 0) {\n        imprimir("Par");\n    } de otro modo {\n        imprimir("Impar");\n    }\n}', tests:[{in:[8], out:['Par']}, {in:[7], out:['Impar']}]},
+{id:13, l:2, title:'Mayor de Edad', statement:'Lee una edad. Si la edad es mayor o igual a 18, imprime "Mayor", de otro modo imprime "Menor".', vars:'entero edad', hint:'si(edad >= 18)', solution:'Algoritmo Edad\n{\n    //Bloque declarativo de variables\n    entero edad;\n    //Bloque de instrucciones\n    leer(edad);\n    si(edad >= 18) {\n        imprimir("Mayor");\n    } de otro modo {\n        imprimir("Menor");\n    }\n}', tests:[{in:[18], out:['Mayor']}, {in:[17], out:['Menor']}]},
+{id:14, l:2, title:'Positivo o Negativo', statement:'Lee un número. Si es mayor o igual a 0, imprime "Positivo", de otro modo imprime "Negativo".', vars:'entero numero', hint:'si(numero >= 0)', solution:'Algoritmo PosNeg\n{\n    //Bloque declarativo de variables\n    entero numero;\n    //Bloque de instrucciones\n    leer(numero);\n    si(numero >= 0) {\n        imprimir("Positivo");\n    } de otro modo {\n        imprimir("Negativo");\n    }\n}', tests:[{in:[5], out:['Positivo']}, {in:[-3], out:['Negativo']}]},
+{id:15, l:2, title:'Descuento Básico', statement:'Lee el monto de una compra. Si el monto es mayor a 100, haz un descuento del 10% e imprime el monto final. De otro modo, imprime el monto normal.', vars:'flotante monto, montoFinal', hint:'montoFinal = monto - (monto * 0.10)', solution:'Algoritmo DescBasico\n{\n    //Bloque declarativo de variables\n    flotante monto, montoFinal;\n    //Bloque de instrucciones\n    leer(monto);\n    si(monto > 100) {\n        montoFinal = monto - (monto * 0.10);\n    } de otro modo {\n        montoFinal = monto;\n    }\n    imprimir(montoFinal);\n}', tests:[{in:[150], out:['135']}, {in:[50], out:['50']}]},
+{id:16, l:2, title:'Contraseña Correcta', statement:'Lee una cadena. Si la cadena es igual a "secreta", imprime "Correcto", de otro modo imprime "Incorrecto".', vars:'cadena clave', hint:'si(clave == "secreta")', solution:'Algoritmo Clave\n{\n    //Bloque declarativo de variables\n    cadena clave;\n    //Bloque de instrucciones\n    leer(clave);\n    si(clave == "secreta") {\n        imprimir("Correcto");\n    } de otro modo {\n        imprimir("Incorrecto");\n    }\n}', tests:[{in:['secreta'], out:['Correcto']}, {in:['1234'], out:['Incorrecto']}]},
+{id:17, l:2, title:'Multa de Velocidad', statement:'Lee la velocidad de un auto. Si la velocidad es mayor a 80, imprime "Multa", de otro modo imprime "Sin multa".', vars:'entero velocidad', hint:'si(velocidad > 80)', solution:'Algoritmo Velocidad\n{\n    //Bloque declarativo de variables\n    entero velocidad;\n    //Bloque de instrucciones\n    leer(velocidad);\n    si(velocidad > 80) {\n        imprimir("Multa");\n    } de otro modo {\n        imprimir("Sin multa");\n    }\n}', tests:[{in:[90], out:['Multa']}, {in:[75], out:['Sin multa']}]},
+{id:18, l:2, title:'Temperatura Extrema', statement:'Lee la temperatura. Si es mayor a 35, imprime "Calor", de otro modo imprime "Normal".', vars:'flotante temp', hint:'si(temp > 35)', solution:'Algoritmo Temp\n{\n    //Bloque declarativo de variables\n    flotante temp;\n    //Bloque de instrucciones\n    leer(temp);\n    si(temp > 35) {\n        imprimir("Calor");\n    } de otro modo {\n        imprimir("Normal");\n    }\n}', tests:[{in:[38], out:['Calor']}, {in:[30], out:['Normal']}]},
+{id:19, l:2, title:'Saldo Suficiente', statement:'Lee el saldo de un cliente y el precio del producto. Si el saldo es mayor o igual al precio, imprime "Comprar", de otro modo "Rechazado".', vars:'flotante saldo, precio', hint:'si(saldo >= precio)', solution:'Algoritmo Compra\n{\n    //Bloque declarativo de variables\n    flotante saldo, precio;\n    //Bloque de instrucciones\n    leer(saldo);\n    leer(precio);\n    si(saldo >= precio) {\n        imprimir("Comprar");\n    } de otro modo {\n        imprimir("Rechazado");\n    }\n}', tests:[{in:[100, 80], out:['Comprar']}, {in:[50, 80], out:['Rechazado']}]},
+{id:20, l:2, title:'Voto Válido', statement:'Lee la edad de una persona. Si es mayor o igual a 18, imprime "Puede votar", de otro modo "No puede votar".', vars:'entero edad', hint:'si(edad >= 18)', solution:'Algoritmo Votar\n{\n    //Bloque declarativo de variables\n    entero edad;\n    //Bloque de instrucciones\n    leer(edad);\n    si(edad >= 18) {\n        imprimir("Puede votar");\n    } de otro modo {\n        imprimir("No puede votar");\n    }\n}', tests:[{in:[20], out:['Puede votar']}, {in:[16], out:['No puede votar']}]},
+
+// NIVEL 3: Condiciones Lógicas (21-30)
+{id:21, l:3, title:'Sistema de Descuentos', statement:'Lee un monto. Si monto > 500, descuento del 20%. Si monto > 200, descuento del 10%. De otro modo 0. Imprime el monto final a pagar.', vars:'flotante monto, descuento, montoFinal', hint:'Usa de otro modo si(monto > 200)', solution:'Algoritmo SistDesc\n{\n    //Bloque declarativo de variables\n    flotante monto, descuento, montoFinal;\n    //Bloque de instrucciones\n    leer(monto);\n    si(monto > 500) {\n        descuento = monto * 0.20;\n    } de otro modo si(monto > 200) {\n        descuento = monto * 0.10;\n    } de otro modo {\n        descuento = 0;\n    }\n    montoFinal = monto - descuento;\n    imprimir(montoFinal);\n}', tests:[{in:[600], out:['480']}, {in:[300], out:['270']}, {in:[100], out:['100']}]},
+{id:22, l:3, title:'Autenticación Login', statement:'Lee un usuario y clave. Si usuario == "admin" y clave == "1234", imprime "Permitido". De otro modo "Denegado".', vars:'cadena usuario, clave', hint:'si(usuario == "admin" && clave == "1234")', solution:'Algoritmo Logins\n{\n    //Bloque declarativo de variables\n    cadena usuario, clave;\n    //Bloque de instrucciones\n    leer(usuario);\n    leer(clave);\n    si(usuario == "admin" && clave == "1234") {\n        imprimir("Permitido");\n    } de otro modo {\n        imprimir("Denegado");\n    }\n}', tests:[{in:['admin','1234'], out:['Permitido']}, {in:['user','0000'], out:['Denegado']}]},
+{id:23, l:3, title:'Promoción de Supermercado', statement:'Lee monto y si posee tarjeta ("si"/"no"). Si monto >= 200 y tarjeta == "si", descuento 15%. Si monto >= 100 o tarjeta == "si", descuento 10%. De otro modo, descuento 5%. Imprime el total a pagar (monto - descuento).', vars:'flotante monto, desc, total; cadena tarjeta', hint:'Usa && para el 15%, || para el 10%.', solution:'Algoritmo PromoSuper\n{\n    //Bloque declarativo de variables\n    flotante monto, desc, total;\n    cadena tarjeta;\n    //Bloque de instrucciones\n    leer(monto);\n    leer(tarjeta);\n    si(monto >= 200 && tarjeta == "si") {\n        desc = monto * 0.15;\n    } de otro modo si(monto >= 100 || tarjeta == "si") {\n        desc = monto * 0.10;\n    } de otro modo {\n        desc = monto * 0.05;\n    }\n    total = monto - desc;\n    imprimir(total);\n}', tests:[{in:[250, 'si'], out:['212.5']}, {in:[150, 'no'], out:['135']}, {in:[50, 'no'], out:['47.5']}]},
+{id:24, l:3, title:'Préstamo de Biblioteca', statement:'Lee multa (flotante) y matricula ("activa"/"inactiva"). Si multa == 0 y matricula == "activa", imprime "Puede". De otro modo "No puede".', vars:'flotante multa; cadena matricula', hint:'si(multa == 0 && matricula == "activa")', solution:'Algoritmo Biblioteca\n{\n    //Bloque declarativo de variables\n    flotante multa;\n    cadena matricula;\n    //Bloque de instrucciones\n    leer(multa);\n    leer(matricula);\n    si(multa == 0 && matricula == "activa") {\n        imprimir("Puede");\n    } de otro modo {\n        imprimir("No puede");\n    }\n}', tests:[{in:[0, 'activa'], out:['Puede']}, {in:[5, 'activa'], out:['No puede']}]},
+{id:25, l:3, title:'Envío de Paquetes', statement:'Lee peso y destino ("nacional"/"internacional"). Si nacional y peso <= 2, costo es 5. Si nacional y peso > 2 y <= 5, costo es 8. De otro modo, costo es 15. Imprime el costo.', vars:'flotante peso, costo; cadena destino', hint:'si(destino == "nacional" && peso <= 2)', solution:'Algoritmo Envios\n{\n    //Bloque declarativo de variables\n    flotante peso, costo;\n    cadena destino;\n    //Bloque de instrucciones\n    leer(peso);\n    leer(destino);\n    si(destino == "nacional" && peso <= 2) {\n        costo = 5;\n    } de otro modo si(destino == "nacional" && peso > 2 && peso <= 5) {\n        costo = 8;\n    } de otro modo {\n        costo = 15;\n    }\n    imprimir(costo);\n}', tests:[{in:[1.5, 'nacional'], out:['5']}, {in:[3.5, 'nacional'], out:['8']}, {in:[6, 'nacional'], out:['15']}]},
+{id:26, l:3, title:'Rango Adolescente', statement:'Lee una edad. Si edad >= 13 y edad <= 17, imprime "Adolescente". De otro modo imprime "No adolescente".', vars:'entero edad', hint:'si(edad >= 13 && edad <= 17)', solution:'Algoritmo Adolescente\n{\n    //Bloque declarativo de variables\n    entero edad;\n    //Bloque de instrucciones\n    leer(edad);\n    si(edad >= 13 && edad <= 17) {\n        imprimir("Adolescente");\n    } de otro modo {\n        imprimir("No adolescente");\n    }\n}', tests:[{in:[15], out:['Adolescente']}, {in:[20], out:['No adolescente']}]},
+{id:27, l:3, title:'Alarma de Seguridad', statement:'Lee el estado de la puerta ("si"/"no") y de la ventana ("si"/"no"). Si alguna de las dos está en "si", imprime "Alarma activada". De otro modo "Todo seguro".', vars:'cadena puerta, ventana', hint:'Usa el operador || (O)', solution:'Algoritmo Alarma\n{\n    //Bloque declarativo de variables\n    cadena puerta, ventana;\n    //Bloque de instrucciones\n    leer(puerta);\n    leer(ventana);\n    si(puerta == "si" || ventana == "si") {\n        imprimir("Alarma activada");\n    } de otro modo {\n        imprimir("Todo seguro");\n    }\n}', tests:[{in:['no', 'si'], out:['Alarma activada']}, {in:['no', 'no'], out:['Todo seguro']}]},
+{id:28, l:3, title:'Beca Universitaria', statement:'Lee el promedio y el ingreso familiar. Si promedio >= 90 y el ingreso es < 1000, imprime "Aprobada". De otro modo imprime "Denegada".', vars:'flotante promedio, ingreso', hint:'si(promedio >= 90 && ingreso < 1000)', solution:'Algoritmo Beca\n{\n    //Bloque declarativo de variables\n    flotante promedio, ingreso;\n    //Bloque de instrucciones\n    leer(promedio);\n    leer(ingreso);\n    si(promedio >= 90 && ingreso < 1000) {\n        imprimir("Aprobada");\n    } de otro modo {\n        imprimir("Denegada");\n    }\n}', tests:[{in:[95, 800], out:['Aprobada']}, {in:[92, 1200], out:['Denegada']}]},
+{id:29, l:3, title:'Sistema de Calificaciones', statement:'Lee nota y asistencia. Si nota >= 90 y asistencia >= 90 imprime "Excelente". Si nota >= 71 y asistencia >= 80 imprime "Aprobado". De otro modo imprime "No aprobado".', vars:'entero nota, asistencia', hint:'Usa && en ambos condicionales.', solution:'Algoritmo Calif\n{\n    //Bloque declarativo de variables\n    entero nota, asistencia;\n    //Bloque de instrucciones\n    leer(nota);\n    leer(asistencia);\n    si(nota >= 90 && asistencia >= 90) {\n        imprimir("Excelente");\n    } de otro modo si(nota >= 71 && asistencia >= 80) {\n        imprimir("Aprobado");\n    } de otro modo {\n        imprimir("No aprobado");\n    }\n}', tests:[{in:[92, 95], out:['Excelente']}, {in:[75, 85], out:['Aprobado']}, {in:[60, 100], out:['No aprobado']}]},
+{id:30, l:3, title:'Entrada al Cine', statement:'Lee la edad y si tiene permiso ("si"/"no"). Si edad >= 18 o permiso == "si", imprime "Entra". De otro modo "No entra".', vars:'entero edad; cadena permiso', hint:'Usa el operador ||', solution:'Algoritmo Cine\n{\n    //Bloque declarativo de variables\n    entero edad;\n    cadena permiso;\n    //Bloque de instrucciones\n    leer(edad);\n    leer(permiso);\n    si(edad >= 18 || permiso == "si") {\n        imprimir("Entra");\n    } de otro modo {\n        imprimir("No entra");\n    }\n}', tests:[{in:[16, 'si'], out:['Entra']}, {in:[17, 'no'], out:['No entra']}]},
+
+// NIVEL 4: Ciclos (31-40)
+{id:31, l:4, title:'Sumatoria Controlada', statement:'Usando un ciclo PARA, lee 3 números (uno en cada vuelta) y súmalos en un acumulador. Imprime la suma final al terminar el ciclo.', vars:'entero i, numero, suma', hint:'suma = 0 antes del ciclo. para(i=1; i<=3; i=i+1)', solution:'Algoritmo Sumar3\n{\n    //Bloque declarativo de variables\n    entero i, numero, suma;\n    //Bloque de instrucciones\n    suma = 0;\n    para(i = 1; i <= 3; i = i + 1) {\n        leer(numero);\n        suma = suma + numero;\n    }\n    imprimir(suma);\n}', tests:[{in:[10, 20, 30], out:['60']}, {in:[5, 5, 5], out:['15']}]},
+{id:32, l:4, title:'Contador de Positivos', statement:'Usando un ciclo PARA de 1 a 4, lee 4 números y cuenta cuántos de ellos son mayores a 0. Imprime el contador al final.', vars:'entero i, numero, contador', hint:'contador = 0. Dentro: si(numero > 0) contador = contador + 1', solution:'Algoritmo ContPositivos\n{\n    //Bloque declarativo de variables\n    entero i, numero, contador;\n    //Bloque de instrucciones\n    contador = 0;\n    para(i = 1; i <= 4; i = i + 1) {\n        leer(numero);\n        si(numero > 0) {\n            contador = contador + 1;\n        }\n    }\n    imprimir(contador);\n}', tests:[{in:[5, -2, 8, 0], out:['2']}]},
+{id:33, l:4, title:'Control de Aprobados', statement:'Lee las calificaciones de 5 estudiantes usando un ciclo. Por cada nota mayor o igual a 71, aumenta un contador. Imprime la cantidad de estudiantes aprobados.', vars:'entero i, nota, aprobados', hint:'Dentro del ciclo: si(nota >= 71) aprobados = aprobados + 1', solution:'Algoritmo CtrlAprobados\n{\n    //Bloque declarativo de variables\n    entero i, nota, aprobados;\n    //Bloque de instrucciones\n    aprobados = 0;\n    para(i = 1; i <= 5; i = i + 1) {\n        leer(nota);\n        si(nota >= 71) {\n            aprobados = aprobados + 1;\n        }\n    }\n    imprimir(aprobados);\n}', tests:[{in:[60, 80, 75, 65, 90], out:['3']}, {in:[100, 100, 100, 100, 100], out:['5']}]},
+{id:34, l:4, title:'Promedio de 4 Notas', statement:'En un ciclo lee 4 notas, súmalas en un acumulador. AL SALIR DEL CICLO, calcula el promedio (suma / 4) e imprímelo.', vars:'entero i; flotante nota, suma, promedio', hint:'Calcula la división fuera de la llave del ciclo.', solution:'Algoritmo PromedioCiclo\n{\n    //Bloque declarativo de variables\n    entero i;\n    flotante nota, suma, promedio;\n    //Bloque de instrucciones\n    suma = 0;\n    para(i = 1; i <= 4; i = i + 1) {\n        leer(nota);\n        suma = suma + nota;\n    }\n    promedio = suma / 4;\n    imprimir(promedio);\n}', tests:[{in:[10, 20, 30, 40], out:['25']}]},
+{id:35, l:4, title:'Contador de Pares', statement:'Lee 5 números en un ciclo. Cuenta cuántos de esos números son pares (numero % 2 == 0) e imprime el contador final.', vars:'entero i, num, pares', hint:'si(num % 2 == 0)', solution:'Algoritmo CuentaPares\n{\n    //Bloque declarativo de variables\n    entero i, num, pares;\n    //Bloque de instrucciones\n    pares = 0;\n    para(i = 1; i <= 5; i = i + 1) {\n        leer(num);\n        si(num % 2 == 0) {\n            pares = pares + 1;\n        }\n    }\n    imprimir(pares);\n}', tests:[{in:[2, 3, 4, 7, 8], out:['3']}]},
+{id:36, l:4, title:'Acumulador de Gastos', statement:'Lee 4 montos de gastos realizados en la semana y súmalos. Imprime el gasto total al terminar.', vars:'entero i; flotante gasto, total', hint:'total = total + gasto', solution:'Algoritmo Gastos\n{\n    //Bloque declarativo de variables\n    entero i;\n    flotante gasto, total;\n    //Bloque de instrucciones\n    total = 0;\n    para(i = 1; i <= 4; i = i + 1) {\n        leer(gasto);\n        total = total + gasto;\n    }\n    imprimir(total);\n}', tests:[{in:[10.5, 20, 5, 15.5], out:['51']}]},
+{id:37, l:4, title:'Contador de Negativos', statement:'Lee 4 números e imprime cuántos de esos números fueron menores que 0.', vars:'entero i, num, negs', hint:'si(num < 0)', solution:'Algoritmo ContNeg\n{\n    //Bloque declarativo de variables\n    entero i, num, negs;\n    //Bloque de instrucciones\n    negs = 0;\n    para(i = 1; i <= 4; i = i + 1) {\n        leer(num);\n        si(num < 0) {\n            negs = negs + 1;\n        }\n    }\n    imprimir(negs);\n}', tests:[{in:[5, -2, -8, 10], out:['2']}]},
+{id:38, l:4, title:'Vueltas a la Pista', statement:'Un atleta da 3 vueltas a una pista. Usando un ciclo, lee el tiempo de cada vuelta y calcula el tiempo total. Imprímelo.', vars:'entero i; flotante tiempo, total', hint:'Un acumulador sencillo para sumar 3 lecturas.', solution:'Algoritmo Vueltas\n{\n    //Bloque declarativo de variables\n    entero i;\n    flotante tiempo, total;\n    //Bloque de instrucciones\n    total = 0;\n    para(i = 1; i <= 3; i = i + 1) {\n        leer(tiempo);\n        total = total + tiempo;\n    }\n    imprimir(total);\n}', tests:[{in:[1.2, 1.3, 1.1], out:['3.6']}]},
+{id:39, l:4, title:'Alumnos Excelentes', statement:'En un salón de 5 estudiantes, lee la nota de cada uno. Cuenta cuántos obtuvieron nota de 90 o más (Excelente). Imprime el conteo final.', vars:'entero i, nota, cuenta', hint:'si(nota >= 90)', solution:'Algoritmo Excelentes\n{\n    //Bloque declarativo de variables\n    entero i, nota, cuenta;\n    //Bloque de instrucciones\n    cuenta = 0;\n    para(i = 1; i <= 5; i = i + 1) {\n        leer(nota);\n        si(nota >= 90) {\n            cuenta = cuenta + 1;\n        }\n    }\n    imprimir(cuenta);\n}', tests:[{in:[90, 80, 95, 70, 100], out:['3']}]},
+{id:40, l:4, title:'Goles en el Torneo', statement:'Un equipo jugó 4 partidos. En un ciclo, lee los goles anotados en cada partido y súmalos para obtener el total del torneo. Imprímelo.', vars:'entero i, goles, total', hint:'Acumula los goles.', solution:'Algoritmo Goles\n{\n    //Bloque declarativo de variables\n    entero i, goles, total;\n    //Bloque de instrucciones\n    total = 0;\n    para(i = 1; i <= 4; i = i + 1) {\n        leer(goles);\n        total = total + goles;\n    }\n    imprimir(total);\n}', tests:[{in:[2, 0, 1, 3], out:['6']}]},
+
+// NIVEL 5: Retos Completos (41-50)
+{id:41, l:5, title:'Registro de Compras (Ciclos + Lógica)', statement:'Registra 3 compras. Para cada una, lee precio y cantidad, calcula el subtotal de esa compra (precio*cantidad) y acumúlalo. Imprime el monto total.', vars:'entero i; flotante precio, cant, total', hint:'total = total + (precio * cant)', solution:'Algoritmo RegCompras\n{\n    //Bloque declarativo de variables\n    entero i;\n    flotante precio, cant, total;\n    //Bloque de instrucciones\n    total = 0;\n    para(i = 1; i <= 3; i = i + 1) {\n        leer(precio);\n        leer(cant);\n        total = total + (precio * cant);\n    }\n    imprimir(total);\n}', tests:[{in:[10,2, 5,3, 8,1], out:['43']}]},
+{id:42, l:5, title:'Entrada al Parque (Reto Lógico)', statement:'Lee edad, membresia ("si"/"no") y estudiante ("si"/"no"). Edad < 5 paga 0. De 5 a 12 paga 5. De 13 a 59 paga 10. >= 60 paga 6. Si membresia == "si" o estudiante == "si", rebaja 20% al precio. Imprime pago final.', vars:'entero edad; cadena mem, est; flotante precio', hint:'Saca el precio base primero, luego haz otro bloque si() para el descuento.', solution:'Algoritmo EntradaParque\n{\n    //Bloque declarativo de variables\n    entero edad;\n    cadena mem, est;\n    flotante precio;\n    //Bloque de instrucciones\n    leer(edad);\n    leer(mem);\n    leer(est);\n    si(edad < 5) {\n        precio = 0;\n    } de otro modo si(edad >= 5 && edad <= 12) {\n        precio = 5;\n    } de otro modo si(edad >= 13 && edad <= 59) {\n        precio = 10;\n    } de otro modo {\n        precio = 6;\n    }\n    si(mem == "si" || est == "si") {\n        precio = precio - (precio * 0.20);\n    }\n    imprimir(precio);\n}', tests:[{in:[35, 'no', 'si'], out:['8']}, {in:[10, 'no', 'no'], out:['5']}, {in:[4, 'si', 'no'], out:['0']}]},
+{id:43, l:5, title:'Nómina con Bono Extra', statement:'Lee horas y pago por hora de 1 empleado. Si las horas son > 40, su sueldo es (horas * pago) + 50 dólares de bono. De otro modo, es solo (horas * pago). Imprime el sueldo final.', vars:'entero horas; flotante pago, sueldo', hint:'Evalúa las horas para decidir la fórmula.', solution:'Algoritmo NominaExtra\n{\n    //Bloque declarativo de variables\n    entero horas;\n    flotante pago, sueldo;\n    //Bloque de instrucciones\n    leer(horas);\n    leer(pago);\n    si(horas > 40) {\n        sueldo = (horas * pago) + 50;\n    } de otro modo {\n        sueldo = horas * pago;\n    }\n    imprimir(sueldo);\n}', tests:[{in:[45, 10], out:['500']}, {in:[40, 10], out:['400']}]},
+{id:44, l:5, title:'Factura de Lujo', statement:'Lee precio y cantidad. Calcula total = precio * cantidad. Si total > 100, aplica 10% descuento al total. Al resultado, añádele 7% de ITBMS. Imprime el valor a pagar.', vars:'flotante precio, cant, total, itbms, pagar', hint:'Aplica descuento primero, y al nuevo total le calculas ITBMS.', solution:'Algoritmo FacLujo\n{\n    //Bloque declarativo de variables\n    flotante precio, cant, total, itbms, pagar;\n    //Bloque de instrucciones\n    leer(precio);\n    leer(cant);\n    total = precio * cant;\n    si(total > 100) {\n        total = total - (total * 0.10);\n    }\n    itbms = total * 0.07;\n    pagar = total + itbms;\n    imprimir(pagar);\n}', tests:[{in:[50, 3], out:['144.45']}, {in:[20, 4], out:['85.6']}]},
+{id:45, l:5, title:'Multas Encadenadas', statement:'Lee la velocidad del auto. Si velocidad > 120, la multa es 200. Si velocidad > 100 y <= 120, multa es 100. Si velocidad > 80 y <= 100, multa es 50. De otro modo, 0. Imprime multa.', vars:'entero vel, multa', hint:'Respeta el orden de los de otro modo si', solution:'Algoritmo Multas\n{\n    //Bloque declarativo de variables\n    entero vel, multa;\n    //Bloque de instrucciones\n    leer(vel);\n    si(vel > 120) {\n        multa = 200;\n    } de otro modo si(vel > 100) {\n        multa = 100;\n    } de otro modo si(vel > 80) {\n        multa = 50;\n    } de otro modo {\n        multa = 0;\n    }\n    imprimir(multa);\n}', tests:[{in:[130], out:['200']}, {in:[110], out:['100']}, {in:[90], out:['50']}, {in:[60], out:['0']}]},
+{id:46, l:5, title:'Inventario Dinámico', statement:'Lee el stock inicial. Luego, en un ciclo de 3 vueltas, lee la cantidad de unidades vendidas y réstalas al stock. Imprime el stock final.', vars:'entero stock, i, ventas', hint:'stock = stock - ventas en cada vuelta.', solution:'Algoritmo Inventario\n{\n    //Bloque declarativo de variables\n    entero stock, i, ventas;\n    //Bloque de instrucciones\n    leer(stock);\n    para(i = 1; i <= 3; i = i + 1) {\n        leer(ventas);\n        stock = stock - ventas;\n    }\n    imprimir(stock);\n}', tests:[{in:[100, 10, 20, 5], out:['65']}]},
+{id:47, l:5, title:'Ahorro Programado', statement:'Lee la meta de ahorro. Luego, lee 4 aportes (ciclo) y súmalos. Al final, si la suma >= meta, imprime "Logrado". De otro modo "Falta".', vars:'flotante meta, suma, aporte; entero i', hint:'La condición va después de que termine el ciclo.', solution:'Algoritmo Ahorro\n{\n    //Bloque declarativo de variables\n    flotante meta, suma, aporte;\n    entero i;\n    //Bloque de instrucciones\n    suma = 0;\n    leer(meta);\n    para(i = 1; i <= 4; i = i + 1) {\n        leer(aporte);\n        suma = suma + aporte;\n    }\n    si(suma >= meta) {\n        imprimir("Logrado");\n    } de otro modo {\n        imprimir("Falta");\n    }\n}', tests:[{in:[500, 100, 200, 100, 150], out:['Logrado']}, {in:[300, 50, 50, 50, 50], out:['Falta']}]},
+{id:48, l:5, title:'Estacionamiento Avanzado', statement:'Lee horas. Si <= 2 horas: 3 dls. Si > 2 y <= 5: 6 dls. Si > 5 y <= 10: 10 dls. Si horas > 10, tarifa fija de 15 dls. Imprime el costo.', vars:'entero horas; flotante costo', hint:'Haz 4 condiciones encadenadas.', solution:'Algoritmo EstacionamientoV2\n{\n    //Bloque declarativo de variables\n    entero horas;\n    flotante costo;\n    //Bloque de instrucciones\n    leer(horas);\n    si(horas <= 2) {\n        costo = 3;\n    } de otro modo si(horas <= 5) {\n        costo = 6;\n    } de otro modo si(horas <= 10) {\n        costo = 10;\n    } de otro modo {\n        costo = 15;\n    }\n    imprimir(costo);\n}', tests:[{in:[2], out:['3']}, {in:[4], out:['6']}, {in:[8], out:['10']}, {in:[12], out:['15']}]},
+{id:49, l:5, title:'Sistema de Puntos de Fidelidad', statement:'Usa un ciclo para leer el monto de compra de 3 clientes. Por cada compra > 50, acumula 1 punto. Imprime el total de puntos acumulados en el día.', vars:'entero i, puntos; flotante compra', hint:'puntos aumenta 1 solo si compra > 50.', solution:'Algoritmo Puntos\n{\n    //Bloque declarativo de variables\n    entero i, puntos;\n    flotante compra;\n    //Bloque de instrucciones\n    puntos = 0;\n    para(i = 1; i <= 3; i = i + 1) {\n        leer(compra);\n        si(compra > 50) {\n            puntos = puntos + 1;\n        }\n    }\n    imprimir(puntos);\n}', tests:[{in:[60, 20, 100], out:['2']}, {in:[10, 20, 30], out:['0']}]},
+{id:50, l:5, title:'Suma de Edad y Categoría', statement:'Lee 3 edades (ciclo). Súmalas. Al final, si la suma > 50 imprime "Grupo Adulto", de otro modo imprime "Grupo Joven".', vars:'entero i, edad, suma', hint:'El si() va fuera del ciclo.', solution:'Algoritmo SumaEdades\n{\n    //Bloque declarativo de variables\n    entero i, edad, suma;\n    //Bloque de instrucciones\n    suma = 0;\n    para(i = 1; i <= 3; i = i + 1) {\n        leer(edad);\n        suma = suma + edad;\n    }\n    si(suma > 50) {\n        imprimir("Grupo Adulto");\n    } de otro modo {\n        imprimir("Grupo Joven");\n    }\n}', tests:[{in:[20, 20, 15], out:['Grupo Adulto']}, {in:[10, 12, 10], out:['Grupo Joven']}]}
+
+,
+// NUEVOS RETOS NARRATIVOS (11-14 en cada nivel)
+{id:51, l:1, title:'Registro de compra en caja', statement:'En una tienda, la persona que atiende la caja debe registrar una compra. El programa necesita recibir el precio de cada unidad y cuántas unidades llevó el cliente. Al terminar, debe mostrar cuánto pagará por esos productos.', vars:'flotante precioUnidad, total; entero cantidad', hint:'Piensa qué operación combina el precio de cada unidad con la cantidad comprada.', solution:'Algoritmo RegistroCompra\n{\n    //Bloque declarativo de variables\n    flotante precioUnidad, total;\n    entero cantidad;\n    //Bloque de instrucciones\n    leer(precioUnidad);\n    leer(cantidad);\n    total = precioUnidad * cantidad;\n    imprimir(total);\n}', tests:[{in:[12.5,4],out:['50']},{in:[8,3],out:['24']}]},
+{id:52, l:1, title:'Consumo de agua del mes', statement:'Una familia quiere revisar cuánta agua consumió durante el último mes. El recibo anterior muestra la lectura del medidor al inicio del período y el recibo actual muestra la lectura al final. El programa debe calcular y mostrar el consumo del mes.', vars:'entero lecturaAnterior, lecturaActual, consumo', hint:'Compara la lectura final con la lectura inicial para obtener lo consumido.', solution:'Algoritmo ConsumoAgua\n{\n    //Bloque declarativo de variables\n    entero lecturaAnterior, lecturaActual, consumo;\n    //Bloque de instrucciones\n    leer(lecturaAnterior);\n    leer(lecturaActual);\n    consumo = lecturaActual - lecturaAnterior;\n    imprimir(consumo);\n}', tests:[{in:[1380,1505],out:['125']},{in:[900,920],out:['20']}]},
+{id:53, l:1, title:'Presupuesto semanal', statement:'Un estudiante quiere llevar la cuenta de sus gastos durante la semana. El programa debe recibir cuánto gastó en transporte, alimentación, materiales y recreación, y luego mostrar el gasto total.', vars:'flotante transporte, alimentacion, materiales, recreacion, total', hint:'Reúne los cuatro montos en una sola cantidad acumulada.', solution:'Algoritmo PresupuestoSemanal\n{\n    //Bloque declarativo de variables\n    flotante transporte, alimentacion, materiales, recreacion, total;\n    //Bloque de instrucciones\n    leer(transporte);\n    leer(alimentacion);\n    leer(materiales);\n    leer(recreacion);\n    total = transporte + alimentacion + materiales + recreacion;\n    imprimir(total);\n}', tests:[{in:[12,8,15,5],out:['40']},{in:[20,10,0,12],out:['42']}]},
+{id:54, l:1, title:'Material para un piso', statement:'Una familia va a instalar piso nuevo en una habitación rectangular. Para estimar el material necesario, se deben registrar el largo y el ancho de la habitación y calcular cuántos metros cuadrados tiene el área que se cubrirá.', vars:'flotante largo, ancho, area', hint:'El área depende de las dos medidas de la habitación.', solution:'Algoritmo AreaPiso\n{\n    //Bloque declarativo de variables\n    flotante largo, ancho, area;\n    //Bloque de instrucciones\n    leer(largo);\n    leer(ancho);\n    area = largo * ancho;\n    imprimir(area);\n}', tests:[{in:[4,3],out:['12']},{in:[7.5,2],out:['15']}]},
+{id:55, l:2, title:'Préstamo de libros en biblioteca', statement:'Una biblioteca universitaria desea revisar si un estudiante puede llevar libros prestados. El personal consulta el valor de su multa pendiente y si su matrícula continúa activa. La biblioteca solo autoriza el préstamo cuando no existe deuda y la matrícula está activa; en cualquier otra situación debe rechazarlo.', vars:'flotante multa; cadena matricula', hint:'El préstamo depende de que se cumplan las dos condiciones administrativas.', solution:'Algoritmo PrestamoBiblioteca\n{\n    //Bloque declarativo de variables\n    flotante multa;\n    cadena matricula;\n    //Bloque de instrucciones\n    leer(multa);\n    leer(matricula);\n    si(multa == 0 && matricula == "activa") {\n        imprimir("Prestamo autorizado");\n    } de otro modo {\n        imprimir("Prestamo rechazado");\n    }\n}', tests:[{in:[0,'activa'],out:['Prestamo autorizado']},{in:[5,'activa'],out:['Prestamo rechazado']},{in:[0,'inactiva'],out:['Prestamo rechazado']}]},
+{id:56, l:2, title:'Beneficio en cafetería', statement:'La cafetería de un instituto quiere reconocer a quienes pertenecen a su programa de clientes frecuentes. Al registrar una compra, el sistema consulta el subtotal y si la persona tiene la tarjeta del programa. Presentando la tarjeta recibe una reducción del 10% en esa compra; si no la tiene, paga el subtotal completo. El programa debe mostrar el total a pagar.', vars:'flotante subtotal, total; cadena tarjeta', hint:'Primero pregunta si la persona presentó la tarjeta y luego calcula el monto correspondiente.', solution:'Algoritmo BeneficioCafeteria\n{\n    //Bloque declarativo de variables\n    flotante subtotal, total;\n    cadena tarjeta;\n    //Bloque de instrucciones\n    leer(subtotal);\n    leer(tarjeta);\n    si(tarjeta == "si") {\n        total = subtotal * 0.90;\n    } de otro modo {\n        total = subtotal;\n    }\n    imprimir(total);\n}', tests:[{in:[45,'si'],out:['40.5']},{in:[50,'no'],out:['50']}]},
+{id:57, l:2, title:'Postulación a una beca', statement:'La coordinación académica recibe solicitudes para una beca por rendimiento. Cada estudiante presenta su promedio acumulado. Para iniciar la postulación se requiere un promedio mínimo de 3.5; el sistema debe indicar si cumple ese requisito.', vars:'flotante promedio', hint:'Compara el promedio recibido con el mínimo del programa de becas.', solution:'Algoritmo PostulacionBeca\n{\n    //Bloque declarativo de variables\n    flotante promedio;\n    //Bloque de instrucciones\n    leer(promedio);\n    si(promedio >= 3.5) {\n        imprimir("Puede postular");\n    } de otro modo {\n        imprimir("No cumple el requisito");\n    }\n}', tests:[{in:[3.7],out:['Puede postular']},{in:[3.4],out:['No cumple el requisito']}]},
+{id:58, l:2, title:'Recepción de paquete pesado', statement:'Una empresa de mensajería calcula el costo de entrega de cada paquete. El sistema recibe el costo base del envío y el peso del paquete. Los paquetes que pesan más de 20 kilogramos generan un cargo adicional fijo de 8 dólares. Al final se muestra el costo del envío.', vars:'flotante costoBase, peso, costoFinal', hint:'Determina si el paquete supera el límite antes de definir el costo final.', solution:'Algoritmo CostoEnvio\n{\n    //Bloque declarativo de variables\n    flotante costoBase, peso, costoFinal;\n    //Bloque de instrucciones\n    leer(costoBase);\n    leer(peso);\n    si(peso > 20) {\n        costoFinal = costoBase + 8;\n    } de otro modo {\n        costoFinal = costoBase;\n    }\n    imprimir(costoFinal);\n}', tests:[{in:[20,25],out:['28']},{in:[10,12],out:['10']}]},
+{id:59, l:3, title:'Promoción para clientes del supermercado', statement:'Un supermercado desea aplicar una promoción especial durante una campaña. Al registrar una compra, el programa consulta el monto y si el cliente posee la tarjeta del establecimiento. Las compras de al menos $200 con tarjeta reciben 15% de descuento. Si no se cumple esa combinación, las compras de al menos $100 o la presentación de la tarjeta dan 10% de descuento. En los demás casos se aplica 5%. El sistema muestra el total que se cobrará.', vars:'flotante monto, descuento, total; cadena tarjeta', hint:'Hay tres posibles beneficios. Evalúa primero el que exige cumplir más requisitos.', solution:'Algoritmo PromocionSupermercado\n{\n    //Bloque declarativo de variables\n    flotante monto, descuento, total;\n    cadena tarjeta;\n    //Bloque de instrucciones\n    leer(monto);\n    leer(tarjeta);\n    si(monto >= 200 && tarjeta == "si") {\n        descuento = monto * 0.15;\n    } de otro modo si(monto >= 100 || tarjeta == "si") {\n        descuento = monto * 0.10;\n    } de otro modo {\n        descuento = monto * 0.05;\n    }\n    total = monto - descuento;\n    imprimir(total);\n}', tests:[{in:[250,'si'],out:['212.5']},{in:[150,'no'],out:['135']},{in:[80,'si'],out:['72']},{in:[80,'no'],out:['76']}]},
+{id:60, l:3, title:'Admisión a curso avanzado', statement:'Una facultad está seleccionando estudiantes para un curso avanzado. Para recomendar a una persona, la coordinación exige un promedio de al menos 80 y que haya completado el examen de ingreso. El sistema debe comunicar si la solicitud queda recomendada o si todavía no reúne los requisitos.', vars:'flotante promedio; cadena examen', hint:'La recomendación requiere que el expediente académico y el examen estén completos.', solution:'Algoritmo AdmisionCurso\n{\n    //Bloque declarativo de variables\n    flotante promedio;\n    cadena examen;\n    //Bloque de instrucciones\n    leer(promedio);\n    leer(examen);\n    si(promedio >= 80 && examen == "si") {\n        imprimir("Solicitud recomendada");\n    } de otro modo {\n        imprimir("Revisar requisitos");\n    }\n}', tests:[{in:[85,'si'],out:['Solicitud recomendada']},{in:[90,'no'],out:['Revisar requisitos']},{in:[75,'si'],out:['Revisar requisitos']}]},
+{id:61, l:3, title:'Tarifa preferencial de transporte', statement:'Una empresa de transporte público está configurando una tarifa preferencial. El sistema consulta la edad del pasajero y si presenta una identificación estudiantil. Las personas de 60 años o más, así como quienes presentan una identificación estudiantil vigente, reciben una tarifa de $0.90; las demás pagan $3.00. Se debe mostrar el monto final.', vars:'entero edad; cadena estudiante; flotante tarifa', hint:'La tarifa reducida puede activarse por cualquiera de los dos criterios.', solution:'Algoritmo TarifaTransporte\n{\n    //Bloque declarativo de variables\n    entero edad;\n    cadena estudiante;\n    flotante tarifa;\n    //Bloque de instrucciones\n    leer(edad);\n    leer(estudiante);\n    si(edad >= 60 || estudiante == "si") {\n        tarifa = 0.90;\n    } de otro modo {\n        tarifa = 3;\n    }\n    imprimir(tarifa);\n}', tests:[{in:[25,'si'],out:['0.9']},{in:[62,'no'],out:['0.9']},{in:[40,'no'],out:['3']}]},
+{id:62, l:3, title:'Clasificación de urgencias', statement:'Una clínica organiza la atención de pacientes según la información inicial que recibe el personal de admisión. El sistema debe señalar como urgente a quien llegue con una alerta roja o a quien presente simultáneamente una temperatura de al menos 39 grados y dificultad para respirar. En los demás casos, la atención se registra como regular.', vars:'cadena alerta, respiracion; flotante temperatura', hint:'Una alerta roja basta por sí sola; la otra ruta necesita que coincidan dos síntomas.', solution:'Algoritmo ClasificacionUrgencias\n{\n    //Bloque declarativo de variables\n    cadena alerta, respiracion;\n    flotante temperatura;\n    //Bloque de instrucciones\n    leer(alerta);\n    leer(temperatura);\n    leer(respiracion);\n    si(alerta == "roja" || (temperatura >= 39 && respiracion == "dificil")) {\n        imprimir("Atencion urgente");\n    } de otro modo {\n        imprimir("Atencion regular");\n    }\n}', tests:[{in:['verde',39.5,'dificil'],out:['Atencion urgente']},{in:['roja',37,'normal'],out:['Atencion urgente']},{in:['verde',37,'normal'],out:['Atencion regular']}]},
+{id:63, l:4, title:'Informe de aprobación del grupo', statement:'Un docente necesita preparar el informe final de una sección con 10 estudiantes. Durante el registro se ingresará la calificación de cada persona. Al terminar, el sistema debe presentar cuántos estudiantes alcanzaron la nota mínima para aprobar.', vars:'entero i, aprobados; flotante nota', hint:'Lleva un contador que aumente únicamente cuando una calificación representa aprobación.', solution:'Algoritmo InformeAprobacion\n{\n    //Bloque declarativo de variables\n    entero i, aprobados;\n    flotante nota;\n    //Bloque de instrucciones\n    aprobados = 0;\n    para(i = 1; i <= 10; i = i + 1) {\n        leer(nota);\n        si(nota >= 71) {\n            aprobados = aprobados + 1;\n        }\n    }\n    imprimir(aprobados);\n}', tests:[{in:[75,80,60,71,90,50,88,69,72,73],out:['7']},{in:[40,55,60,70,0,68,20,10,50,65],out:['0']}]},
+{id:64, l:4, title:'Total de la lista de compras', statement:'Una persona quiere conocer cuánto gastará en una visita al supermercado. Registrará cinco productos; para cada uno anotará el precio y la cantidad que llevará. El sistema calculará el importe de cada producto y al final mostrará el total de la compra.', vars:'entero i, cantidad; flotante precio, total', hint:'En cada repetición calcula el importe de un producto y acumúlalo junto con los anteriores.', solution:'Algoritmo TotalCompras\n{\n    //Bloque declarativo de variables\n    entero i, cantidad;\n    flotante precio, total;\n    //Bloque de instrucciones\n    total = 0;\n    para(i = 1; i <= 5; i = i + 1) {\n        leer(precio);\n        leer(cantidad);\n        total = total + (precio * cantidad);\n    }\n    imprimir(total);\n}', tests:[{in:[2,3,10,2,1.5,4,7,1,5,2],out:['49']}]},
+{id:65, l:4, title:'Resumen de lluvia semanal', statement:'El departamento de ambiente quiere preparar un resumen de las lluvias de una semana. Se registrará la cantidad caída en cada uno de los siete días. Al finalizar, el reporte debe indicar la precipitación acumulada y cuántos días superaron los 50 milímetros.', vars:'entero i, diasFuertes; flotante lluvia, total', hint:'Usa un acumulador para la precipitación y otro contador para los días que superen el umbral.', solution:'Algoritmo ResumenLluvia\n{\n    //Bloque declarativo de variables\n    entero i, diasFuertes;\n    flotante lluvia, total;\n    //Bloque de instrucciones\n    total = 0;\n    diasFuertes = 0;\n    para(i = 1; i <= 7; i = i + 1) {\n        leer(lluvia);\n        total = total + lluvia;\n        si(lluvia > 50) {\n            diasFuertes = diasFuertes + 1;\n        }\n    }\n    imprimir(total);\n    imprimir(diasFuertes);\n}', tests:[{in:[10,60,20,75,0,55,30],out:['250','3']}]},
+{id:66, l:4, title:'Horas extra del equipo', statement:'El área de recursos humanos está revisando las jornadas de seis empleados. Por cada persona se registrarán las horas trabajadas en un día. El sistema debe calcular el total de horas del equipo y contar cuántas personas superaron la jornada regular de ocho horas.', vars:'entero i, horas, total, diasExtra', hint:'Actualiza la suma en cada vuelta y usa una condición para contar a quienes pasen la jornada regular.', solution:'Algoritmo HorasEquipo\n{\n    //Bloque declarativo de variables\n    entero i, horas, total, diasExtra;\n    //Bloque de instrucciones\n    total = 0;\n    diasExtra = 0;\n    para(i = 1; i <= 6; i = i + 1) {\n        leer(horas);\n        total = total + horas;\n        si(horas > 8) {\n            diasExtra = diasExtra + 1;\n        }\n    }\n    imprimir(total);\n    imprimir(diasExtra);\n}', tests:[{in:[8,10,7,9,8,12],out:['54','3']}]},
+{id:67, l:5, title:'Cierre de promoción del supermercado', statement:'Al finalizar una campaña, el supermercado quiere conocer cuánto cobró por las compras de cinco clientes. Para cada cliente se revisa el monto de la compra y si tiene tarjeta del local. Las compras de al menos $200 con tarjeta reciben 15% de descuento; cuando no se cumple esa combinación, una compra de al menos $100 o la presentación de tarjeta da 10%; los demás clientes reciben 5%. El programa debe calcular el descuento de cada operación y presentar el total cobrado por todas.', vars:'entero i; cadena tarjeta; flotante monto, descuento, total', hint:'Procesa cada compra en el ciclo, determina su beneficio y acumula lo que finalmente paga cada cliente.', solution:'Algoritmo CierrePromocion\n{\n    //Bloque declarativo de variables\n    entero i;\n    cadena tarjeta;\n    flotante monto, descuento, total;\n    //Bloque de instrucciones\n    total = 0;\n    para(i = 1; i <= 5; i = i + 1) {\n        leer(monto);\n        leer(tarjeta);\n        si(monto >= 200 && tarjeta == "si") {\n            descuento = monto * 0.15;\n        } de otro modo si(monto >= 100 || tarjeta == "si") {\n            descuento = monto * 0.10;\n        } de otro modo {\n            descuento = monto * 0.05;\n        }\n        total = total + (monto - descuento);\n    }\n    imprimir(total);\n}', tests:[{in:[250,'si',150,'no',80,'si',50,'no',200,'no'],out:['647']}]},
+{id:68, l:5, title:'Control de inventario al cierre', statement:'Una tienda comienza el día con cierta cantidad de unidades de un producto. A lo largo del día registrará cuatro ventas. Al cierre debe mostrar las unidades restantes e indicar si hace falta solicitar reposición, si quedan 10 unidades o menos.', vars:'entero i, stock, vendidos', hint:'Actualiza las existencias con cada venta y evalúa el nivel una vez terminado el ciclo.', solution:'Algoritmo CierreInventario\n{\n    //Bloque declarativo de variables\n    entero i, stock, vendidos;\n    //Bloque de instrucciones\n    leer(stock);\n    para(i = 1; i <= 4; i = i + 1) {\n        leer(vendidos);\n        stock = stock - vendidos;\n    }\n    imprimir(stock);\n    si(stock <= 10) {\n        imprimir("Solicitar reposicion");\n    } de otro modo {\n        imprimir("Stock suficiente");\n    }\n}', tests:[{in:[50,20,5,10,5],out:['10','Solicitar reposicion']},{in:[100,20,10,10,5],out:['55','Stock suficiente']}]},
+{id:69, l:5, title:'Factura mensual de electricidad', statement:'Una compañía eléctrica prepara una factura con un cargo fijo y una tarifa por consumo. Los primeros 100 kilovatios hora cuestan $0.10 por unidad y cada unidad adicional cuesta $0.15. A ese consumo se suma un cargo fijo de $5. El programa recibe el consumo mensual y calcula el importe de la factura.', vars:'flotante consumo, factura', hint:'Separa el consumo en el tramo inicial y el excedente cuando se supera el límite.', solution:'Algoritmo FacturaElectricidad\n{\n    //Bloque declarativo de variables\n    flotante consumo, factura;\n    //Bloque de instrucciones\n    leer(consumo);\n    si(consumo <= 100) {\n        factura = 5 + (consumo * 0.10);\n    } de otro modo {\n        factura = 5 + 10 + ((consumo - 100) * 0.15);\n    }\n    imprimir(factura);\n}', tests:[{in:[80],out:['13']},{in:[150],out:['22.5']}]},
+{id:70, l:5, title:'Nómina semanal del taller', statement:'Un taller desea preparar la nómina de cuatro trabajadores. Para cada persona se registrarán las horas trabajadas y su pago por hora. La jornada regular es de 40 horas semanales; cada hora adicional se paga a una vez y media la tarifa regular. El reporte final debe mostrar el costo total de la nómina y cuántas personas trabajaron horas adicionales.', vars:'entero i, horas, personasExtra; flotante tarifa, pago, total', hint:'Calcula el pago individual dentro del ciclo, aplica la tarifa especial cuando corresponda y lleva un contador de personas con horas adicionales.', solution:'Algoritmo NominaTaller\n{\n    //Bloque declarativo de variables\n    entero i, horas, personasExtra;\n    flotante tarifa, pago, total;\n    //Bloque de instrucciones\n    total = 0;\n    personasExtra = 0;\n    para(i = 1; i <= 4; i = i + 1) {\n        leer(horas);\n        leer(tarifa);\n        si(horas > 40) {\n            pago = (40 * tarifa) + ((horas - 40) * tarifa * 1.5);\n            personasExtra = personasExtra + 1;\n        } de otro modo {\n            pago = horas * tarifa;\n        }\n        total = total + pago;\n    }\n    imprimir(total);\n    imprimir(personasExtra);\n}', tests:[{in:[45,10,40,12,35,8,50,10],out:['1785','2']}]}
+];
+
+const makeProblem = (id,l,title,statement,vars,hint,name,declarations,instructions,tests) => ({
+  id,l,title,statement,vars,hint,
+  solution:`Algoritmo ${name}\n{\n    //Bloque declarativo de variables\n${declarations}\n    //Bloque de instrucciones\n${instructions}\n}`,
+  tests
+});
+const makeFunctionProblem = (id,title,statement,vars,returnType,functionName,parameters,localDeclarations,functionBody,mainDeclarations,mainBody,tests) => ({
+  id,l:6,title,statement,vars,
+  hint:'Define la función antes del algoritmo principal; declara el tipo de retorno y los parámetros, y devuelve el resultado con retornar.',
+  solution:`${returnType} ${functionName}(${parameters}) {\n${localDeclarations}\n${functionBody}\n}\nAlgoritmo ${functionName}Principal\n{\n    //Bloque declarativo de variables\n${mainDeclarations}\n    //Bloque de instrucciones\n${mainBody}\n}`,
+  tests
+});
+const newTasks = [
+  makeProblem(71,1,'Consumo de agua del edificio','La administración de un edificio registra el consumo mensual de agua y calcula la factura con una cuota fija de B/.6.50 más B/.0.12 por cada metro cúbico. El sistema debe mostrar el total.','flotante consumo, factura','Agrega la cuota fija al costo variable del consumo.','FacturaAgua','    flotante consumo, factura;','    leer(consumo);\n    factura = 6.50 + (consumo * 0.12);\n    imprimir(factura);',[{in:[100],out:['18.5']},{in:[250],out:['36.5']}]),
+  makeProblem(72,1,'Distancia de una ruta','Una empresa de transporte convierte la distancia de una ruta expresada en kilómetros a metros. Solicita la distancia y muestra su equivalente en metros.','flotante kilometros, metros','Un kilómetro equivale a 1000 metros.','ConvertirRuta','    flotante kilometros, metros;','    leer(kilometros);\n    metros = kilometros * 1000;\n    imprimir(metros);',[{in:[3.4],out:['3400']},{in:[12],out:['12000']}]),
+  makeProblem(73,1,'Compra de material escolar','Una escuela compra cuadernos para sus estudiantes. Se registra el precio unitario y la cantidad; el sistema muestra el subtotal y el total incluyendo 7% de impuesto.','entero cantidad; flotante precio, subtotal, total','Calcula primero el subtotal y luego el impuesto sobre ese subtotal.','CompraEscolar','    entero cantidad;\n    flotante precio, subtotal, total;','    leer(precio);\n    leer(cantidad);\n    subtotal = precio * cantidad;\n    total = subtotal + (subtotal * 0.07);\n    imprimir(subtotal);\n    imprimir(total);',[{in:[2,5],out:['10','10.7']},{in:[3.5,4],out:['14','14.98']}]),
+  makeProblem(74,1,'Reparto del presupuesto de excursión','Un grupo estudiantil desea repartir el presupuesto de una excursión en partes iguales entre quienes asistirán. El programa recibe el presupuesto y el número de participantes, y muestra cuánto aporta cada persona.','entero participantes; flotante presupuesto, aporte','Divide el presupuesto entre la cantidad de participantes.','AporteExcursion','    entero participantes;\n    flotante presupuesto, aporte;','    leer(presupuesto);\n    leer(participantes);\n    aporte = presupuesto / participantes;\n    imprimir(aporte);',[{in:[240,12],out:['20']},{in:[157.5,7],out:['22.5']}]),
+  makeProblem(75,1,'Servicio de impresión universitaria','El laboratorio de informática cobra B/.0.08 por página impresa y una cuota fija de B/.0.25 por trabajo. Solicita la cantidad de páginas e informa el costo total.','entero paginas; flotante costo','Multiplica páginas por B/.0.08 y agrega la cuota fija.','CostoImpresion','    entero paginas;\n    flotante costo;','    leer(paginas);\n    costo = 0.25 + (paginas * 0.08);\n    imprimir(costo);',[{in:[10],out:['1.05']},{in:[25],out:['2.25']}]),
+  makeProblem(76,2,'Recargo por devolución tardía','Una biblioteca aplica un recargo de B/.2 por cada día de atraso al devolver un libro. Si se entrega dentro del plazo, no se cobra. El programa recibe los días de atraso y muestra el recargo.','entero dias; flotante recargo','El recargo solo se aplica cuando los días de atraso son mayores que cero.','RecargoBiblioteca','    entero dias;\n    flotante recargo;','    leer(dias);\n    si(dias > 0) {\n        recargo = dias * 2;\n    } de otro modo {\n        recargo = 0;\n    }\n    imprimir(recargo);',[{in:[3],out:['6']},{in:[0],out:['0']}]),
+  makeProblem(77,2,'Apoyo por rendimiento académico','La coordinación universitaria ofrece apoyo académico a estudiantes con una calificación de 85 o más. Consulta la nota e indica si la persona puede recibir el apoyo.','flotante nota','Compara la calificación con el mínimo requerido.','ApoyoAcademico','    flotante nota;','    leer(nota);\n    si(nota >= 85) {\n        imprimir("Puede recibir el apoyo");\n    } de otro modo {\n        imprimir("No puede recibir el apoyo");\n    }',[{in:[90],out:['Puede recibir el apoyo']},{in:[84.9],out:['No puede recibir el apoyo']}]),
+  makeProblem(78,2,'Envío de una tienda en línea','Una tienda cobra B/.5 por el envío de cada pedido, excepto cuando la compra es de B/.100 o más. El programa recibe el monto de compra y muestra el total incluyendo el envío.','flotante compra, total','Determina si corresponde el cargo de envío antes de calcular el total.','CostoEnvioCompra','    flotante compra, total;','    leer(compra);\n    si(compra >= 100) {\n        total = compra;\n    } de otro modo {\n        total = compra + 5;\n    }\n    imprimir(total);',[{in:[120],out:['120']},{in:[80],out:['85']}]),
+  makeProblem(79,2,'Acceso al laboratorio','El laboratorio universitario permite ingresar a personas de 18 años o más. El sistema solicita la edad e indica si la persona está autorizada.','entero edad','Compara la edad con 18.','AccesoLaboratorio','    entero edad;','    leer(edad);\n    si(edad >= 18) {\n        imprimir("Acceso autorizado");\n    } de otro modo {\n        imprimir("Acceso denegado");\n    }',[{in:[18],out:['Acceso autorizado']},{in:[17],out:['Acceso denegado']}]),
+  makeProblem(80,2,'Bono por meta de ventas','Una empresa reconoce con B/.50 a cada vendedor que alcance ventas mensuales de B/.500. El sistema recibe las ventas del mes y muestra el bono que corresponde.','flotante ventas, bono','Asigna B/.50 cuando se alcanza la meta y cero en los demás casos.','BonoVentas','    flotante ventas, bono;','    leer(ventas);\n    si(ventas >= 500) {\n        bono = 50;\n    } de otro modo {\n        bono = 0;\n    }\n    imprimir(bono);',[{in:[650],out:['50']},{in:[499.99],out:['0']}]),
+  makeProblem(81,3,'Promoción con tarjeta del supermercado','Un supermercado aplica 15% de descuento cuando la compra es de al menos B/.200 y el cliente tiene tarjeta. Si no cumple ambas condiciones, pero la compra llega a B/.100 o presenta tarjeta, aplica 10%; en otro caso aplica 5%. Muestra el total a pagar.','flotante monto, descuento, total; cadena tarjeta','Evalúa primero la combinación que ofrece el mayor descuento.','PromocionTarjeta','    flotante monto, descuento, total;\n    cadena tarjeta;','    leer(monto);\n    leer(tarjeta);\n    si(monto >= 200 && tarjeta == "si") {\n        descuento = 0.15;\n    } de otro modo si(monto >= 100 || tarjeta == "si") {\n        descuento = 0.10;\n    } de otro modo {\n        descuento = 0.05;\n    }\n    total = monto - (monto * descuento);\n    imprimir(total);',[{in:[250,'si'],out:['212.5']},{in:[150,'no'],out:['135']},{in:[80,'si'],out:['72']},{in:[80,'no'],out:['76']}]),
+  makeProblem(82,3,'Préstamo de libros','Una biblioteca autoriza préstamos solamente si la matrícula está activa y no existe multa pendiente. Consulta el monto adeudado y el estado de matrícula, y comunica la decisión.','flotante multa; cadena matricula','Se deben cumplir simultáneamente las dos condiciones.','PrestamoLibros','    flotante multa;\n    cadena matricula;','    leer(multa);\n    leer(matricula);\n    si(multa == 0 && matricula == "activa") {\n        imprimir("Prestamo autorizado");\n    } de otro modo {\n        imprimir("Prestamo rechazado");\n    }',[{in:[0,'activa'],out:['Prestamo autorizado']},{in:[5,'activa'],out:['Prestamo rechazado']},{in:[0,'inactiva'],out:['Prestamo rechazado']}]),
+  makeProblem(83,3,'Requisitos de una vacante','Una empresa considera a una persona si tiene título y al menos dos años de experiencia, o si cuenta con una certificación profesional vigente. El sistema indica si reúne los requisitos.','entero experiencia; cadena titulo, certificacion','Agrupa título y experiencia; la certificación es una condición alternativa.','RequisitosVacante','    entero experiencia;\n    cadena titulo, certificacion;','    leer(experiencia);\n    leer(titulo);\n    leer(certificacion);\n    si((titulo == "si" && experiencia >= 2) || certificacion == "si") {\n        imprimir("Cumple los requisitos");\n    } de otro modo {\n        imprimir("No cumple los requisitos");\n    }',[{in:[3,'si','no'],out:['Cumple los requisitos']},{in:[1,'si','no'],out:['No cumple los requisitos']},{in:[0,'no','si'],out:['Cumple los requisitos']}]),
+  makeProblem(84,3,'Clasificación de urgencias','Una clínica marca urgente a quien llegue con alerta roja o presente simultáneamente temperatura de al menos 39 grados y dificultad para respirar. Consulta esos datos y señala la prioridad.','cadena alerta, respiracion; flotante temperatura','La alerta roja basta por sí sola; la segunda regla exige temperatura alta y dificultad respiratoria.','UrgenciaClinica','    cadena alerta, respiracion;\n    flotante temperatura;','    leer(alerta);\n    leer(temperatura);\n    leer(respiracion);\n    si(alerta == "roja" || (temperatura >= 39 && respiracion == "dificil")) {\n        imprimir("Atencion urgente");\n    } de otro modo {\n        imprimir("Atencion regular");\n    }',[{in:['verde',39.5,'dificil'],out:['Atencion urgente']},{in:['roja',37,'normal'],out:['Atencion urgente']},{in:['verde',38,'normal'],out:['Atencion regular']}]),
+  makeProblem(85,3,'Tarifa de transporte estudiantil','Una empresa cobra B/.0.90 a pasajeros de 60 años o más, o a estudiantes con identificación vigente. Los demás pagan B/.3.00. El sistema determina la tarifa.','entero edad; cadena estudiante; flotante tarifa','La tarifa preferencial se activa por cualquiera de los criterios.','TarifaPreferencial','    entero edad;\n    cadena estudiante;\n    flotante tarifa;','    leer(edad);\n    leer(estudiante);\n    si(edad >= 60 || estudiante == "si") {\n        tarifa = 0.90;\n    } de otro modo {\n        tarifa = 3;\n    }\n    imprimir(tarifa);',[{in:[65,'no'],out:['0.9']},{in:[20,'si'],out:['0.9']},{in:[40,'no'],out:['3']}]),
+  makeProblem(86,4,'Informe de aprobados del curso','Un docente registrará las calificaciones de diez estudiantes y necesita saber cuántos alcanzaron la nota mínima de 71.','entero i, aprobados; flotante nota','Usa un contador que aumente cuando la calificación sea al menos 71.','InformeAprobados','    entero i, aprobados;\n    flotante nota;','    aprobados = 0;\n    para(i = 1; i <= 10; i = i + 1) {\n        leer(nota);\n        si(nota >= 71) {\n            aprobados = aprobados + 1;\n        }\n    }\n    imprimir(aprobados);',[{in:[75,80,60,71,90,50,88,69,72,73],out:['7']},{in:[40,55,60,70,0,68,20,10,50,65],out:['0']}]),
+  makeProblem(87,4,'Total de compras del supermercado','Una persona registrará cinco productos. Para cada uno ingresará precio y cantidad; al final desea conocer el gasto total.','entero i, cantidad; flotante precio, total','Calcula el subtotal de cada producto y acumúlalo.','TotalCompras','    entero i, cantidad;\n    flotante precio, total;','    total = 0;\n    para(i = 1; i <= 5; i = i + 1) {\n        leer(precio);\n        leer(cantidad);\n        total = total + (precio * cantidad);\n    }\n    imprimir(total);',[{in:[2,3,10,2,1.5,4,7,1,5,2],out:['49']},{in:[1,1,2,2,3,3,4,4,5,5],out:['55']}]),
+  makeProblem(88,4,'Precipitación de la semana','El departamento de ambiente registra la lluvia de siete días. El reporte semanal debe mostrar la precipitación acumulada y cuántos días superaron 50 milímetros.','entero i, diasFuertes; flotante lluvia, total','Usa un acumulador y un contador dentro del ciclo.','ReporteLluvia','    entero i, diasFuertes;\n    flotante lluvia, total;','    total = 0;\n    diasFuertes = 0;\n    para(i = 1; i <= 7; i = i + 1) {\n        leer(lluvia);\n        total = total + lluvia;\n        si(lluvia > 50) {\n            diasFuertes = diasFuertes + 1;\n        }\n    }\n    imprimir(total);\n    imprimir(diasFuertes);',[{in:[10,60,20,75,0,55,30],out:['250','3']},{in:[0,0,0,0,0,0,0],out:['0','0']}]),
+  makeProblem(89,4,'Registro de horas de práctica','Un laboratorio registra las horas dedicadas por seis estudiantes. El sistema presentará el total y cuántos practicaron más de ocho horas.','entero i, horas, total, estudiantesExtra','Acumula las horas y cuenta por separado los registros mayores que ocho.','HorasPractica','    entero i, horas, total, estudiantesExtra;','    total = 0;\n    estudiantesExtra = 0;\n    para(i = 1; i <= 6; i = i + 1) {\n        leer(horas);\n        total = total + horas;\n        si(horas > 8) {\n            estudiantesExtra = estudiantesExtra + 1;\n        }\n    }\n    imprimir(total);\n    imprimir(estudiantesExtra);',[{in:[8,10,7,9,8,12],out:['54','3']},{in:[2,3,4,5,6,7],out:['27','0']}]),
+  makeProblem(90,4,'Seguimiento de ventas diarias','Una tienda registra las ventas de cinco días y desea conocer el total semanal y cuántos días superaron B/.100.','entero i, diasMeta; flotante venta, total','En cada vuelta agrega la venta y revisa si superó la meta.','VentasSemanales','    entero i, diasMeta;\n    flotante venta, total;','    total = 0;\n    diasMeta = 0;\n    para(i = 1; i <= 5; i = i + 1) {\n        leer(venta);\n        total = total + venta;\n        si(venta > 100) {\n            diasMeta = diasMeta + 1;\n        }\n    }\n    imprimir(total);\n    imprimir(diasMeta);',[{in:[80,120,100,150,50],out:['500','2']},{in:[40,60,75,80,90],out:['345','0']}]),
+  makeProblem(91,5,'Nómina de trabajadores','Un taller calcula la nómina de cuatro trabajadores. Por persona ingresa horas y tarifa; el tiempo superior a 40 se paga a 1.5 veces la tarifa. El informe muestra el costo total y cuántos hicieron horas extra.','entero i, horas, personasExtra; flotante tarifa, pago, total','Calcula el pago individual, aplica el recargo y acumula el total.','NominaTaller','    entero i, horas, personasExtra;\n    flotante tarifa, pago, total;','    total = 0;\n    personasExtra = 0;\n    para(i = 1; i <= 4; i = i + 1) {\n        leer(horas);\n        leer(tarifa);\n        si(horas > 40) {\n            pago = (40 * tarifa) + ((horas - 40) * tarifa * 1.5);\n            personasExtra = personasExtra + 1;\n        } de otro modo {\n            pago = horas * tarifa;\n        }\n        total = total + pago;\n    }\n    imprimir(total);\n    imprimir(personasExtra);',[{in:[45,10,40,12,35,8,50,10],out:['1785','2']},{in:[40,10,40,10,40,10,40,10],out:['1600','0']}]),
+  makeProblem(92,5,'Cierre de promoción de la tienda','Una tienda desea saber cuánto cobró por las compras de cinco clientes. Cada compra recibe un descuento según el monto y si el cliente tiene tarjeta. Al final se presenta el total recaudado.','entero i; cadena tarjeta; flotante monto, descuento, total','Determina el descuento de cada cliente y acumula el importe pagado.','CierrePromocion','    entero i;\n    cadena tarjeta;\n    flotante monto, descuento, total;','    total = 0;\n    para(i = 1; i <= 5; i = i + 1) {\n        leer(monto);\n        leer(tarjeta);\n        si(monto >= 200 && tarjeta == "si") {\n            descuento = 0.15;\n        } de otro modo si(monto >= 100 || tarjeta == "si") {\n            descuento = 0.10;\n        } de otro modo {\n            descuento = 0.05;\n        }\n        total = total + (monto - monto * descuento);\n    }\n    imprimir(total);',[{in:[250,'si',150,'no',80,'si',50,'no',200,'no'],out:['647']},{in:[50,'no',75,'no',120,'si',300,'si',90,'no'],out:['567.25']}]),
+  makeProblem(93,5,'Control de inventario y reposición','Una farmacia empieza el día con cierta cantidad de cajas y registra las ventas de cuatro turnos. Al cierre muestra las unidades restantes e indica si quedan diez o menos.','entero i, stock, vendidos','Actualiza las existencias y evalúa la reposición al terminar el ciclo.','CierreFarmacia','    entero i, stock, vendidos;','    leer(stock);\n    para(i = 1; i <= 4; i = i + 1) {\n        leer(vendidos);\n        stock = stock - vendidos;\n    }\n    imprimir(stock);\n    si(stock <= 10) {\n        imprimir("Solicitar reposicion");\n    } de otro modo {\n        imprimir("Stock suficiente");\n    }',[{in:[50,20,5,10,5],out:['10','Solicitar reposicion']},{in:[100,20,10,10,5],out:['55','Stock suficiente']}]),
+  makeProblem(94,5,'Resumen de calificaciones del grupo','Una docente registra las notas de ocho estudiantes. El informe debe mostrar el promedio y cuántas personas aprobaron con al menos 71 puntos.','entero i, aprobados; flotante nota, suma, promedio','Acumula las notas, cuenta aprobados y calcula el promedio al final.','ResumenNotas','    entero i, aprobados;\n    flotante nota, suma, promedio;','    suma = 0;\n    aprobados = 0;\n    para(i = 1; i <= 8; i = i + 1) {\n        leer(nota);\n        suma = suma + nota;\n        si(nota >= 71) {\n            aprobados = aprobados + 1;\n        }\n    }\n    promedio = suma / 8;\n    imprimir(promedio);\n    imprimir(aprobados);',[{in:[80,70,90,60,75,85,50,90],out:['75','5']},{in:[60,61,62,63,64,65,66,67],out:['63.5','0']}]),
+  makeProblem(95,5,'Consumo mensual de electricidad','Una familia calcula su factura eléctrica: los primeros 100 kWh cuestan B/.0.10 por unidad y el excedente B/.0.15 por unidad. Se suma una cuota fija de B/.5.','flotante consumo, factura','Aplica la tarifa excedente solo a los kilovatios que pasan de 100.','FacturaMensual','    flotante consumo, factura;','    leer(consumo);\n    si(consumo <= 100) {\n        factura = 5 + (consumo * 0.10);\n    } de otro modo {\n        factura = 15 + ((consumo - 100) * 0.15);\n    }\n    imprimir(factura);',[{in:[80],out:['13']},{in:[150],out:['22.5']}]),
+  makeFunctionProblem(96,'Pago de horas extra','Una empresa calcula el pago de horas extra mediante una función que recibe las horas trabajadas y devuelve el monto a razón de B/.12.50 por hora.','entero horas; flotante pago','flotante','CalcularPago','entero horas','    flotante pago;','    pago = horas * 12.50;\n    retornar pago;','    entero horas;\n    flotante pago;','    leer(horas);\n    pago = CalcularPago(horas);\n    imprimir(pago);',[{in:[4],out:['50']},{in:[10],out:['125']}]),
+  makeFunctionProblem(97,'Descuento de una compra','Una tienda aplica 15% de descuento a compras de B/.200 o más. Una función recibe el monto y devuelve el descuento.','flotante compra, descuento','flotante','CalcularDescuento','flotante compra','    flotante descuento;','    si(compra >= 200) {\n        descuento = compra * 0.15;\n    } de otro modo {\n        descuento = 0;\n    }\n    retornar descuento;','    flotante compra, descuento;','    leer(compra);\n    descuento = CalcularDescuento(compra);\n    imprimir(descuento);',[{in:[250],out:['37.5']},{in:[150],out:['0']}]),
+  makeFunctionProblem(98,'Área de un círculo','Una aplicación de arquitectura recibe el radio de una habitación circular. La función calcula y devuelve el área usando 3.1416 como aproximación de pi.','flotante radio, area','flotante','CalcularAreaCirculo','flotante radio','    flotante area;','    area = 3.1416 * radio * radio;\n    retornar area;','    flotante radio, area;','    leer(radio);\n    area = CalcularAreaCirculo(radio);\n    imprimir(area);',[{in:[2],out:['12.5664']},{in:[5],out:['78.54']}]),
+  makeFunctionProblem(99,'Perímetro de un rectángulo','Una arquitecta necesita calcular el perímetro de una habitación. La función recibe el ancho y el largo, y devuelve el perímetro.','flotante ancho, largo, perimetro','flotante','CalcularPerimetro','flotante ancho, flotante largo','    flotante perimetro;','    perimetro = 2 * (ancho + largo);\n    retornar perimetro;','    flotante ancho, largo, perimetro;','    leer(ancho);\n    leer(largo);\n    perimetro = CalcularPerimetro(ancho, largo);\n    imprimir(perimetro);',[{in:[4,7],out:['22']},{in:[2.5,6],out:['17']}]),
+  makeFunctionProblem(100,'Mayor de dos mediciones','Un laboratorio compara dos mediciones y utiliza una función que devuelve el valor mayor. El programa recibe ambas mediciones y presenta el resultado.','flotante medicion1, medicion2, mayor','flotante','MayorMedicion','flotante medicion1, flotante medicion2','    flotante mayor;','    si(medicion1 > medicion2) {\n        mayor = medicion1;\n    } de otro modo {\n        mayor = medicion2;\n    }\n    retornar mayor;','    flotante medicion1, medicion2, mayor;','    leer(medicion1);\n    leer(medicion2);\n    mayor = MayorMedicion(medicion1, medicion2);\n    imprimir(mayor);',[{in:[12,9],out:['12']},{in:[3,8],out:['8']}]),
+  makeFunctionProblem(101,'Promedio de tres evaluaciones','Una estudiante quiere calcular su promedio parcial. Una función recibe tres calificaciones y devuelve el promedio aritmético.','flotante nota1, nota2, nota3, promedio','flotante','CalcularPromedio','flotante nota1, flotante nota2, flotante nota3','    flotante promedio;','    promedio = (nota1 + nota2 + nota3) / 3;\n    retornar promedio;','    flotante nota1, nota2, nota3, promedio;','    leer(nota1);\n    leer(nota2);\n    leer(nota3);\n    promedio = CalcularPromedio(nota1, nota2, nota3);\n    imprimir(promedio);',[{in:[80,90,100],out:['90']},{in:[70,75,80],out:['75']}]),
+  makeFunctionProblem(102,'Clasificación de mayoría de edad','Un sistema de registro usa una función para clasificar a las personas: desde los 18 años devuelve "Mayor de edad" y, en otro caso, "Menor de edad".','entero edad; cadena clasificacion','cadena','ClasificarEdad','entero edad','    cadena clasificacion;','    si(edad >= 18) {\n        clasificacion = "Mayor de edad";\n    } de otro modo {\n        clasificacion = "Menor de edad";\n    }\n    retornar clasificacion;','    entero edad;\n    cadena clasificacion;','    leer(edad);\n    clasificacion = ClasificarEdad(edad);\n    imprimir(clasificacion);',[{in:[18],out:['Mayor de edad']},{in:[16],out:['Menor de edad']}]),
+  makeFunctionProblem(103,'Determinar si un número es par','Una aplicación necesita una función lógica que reciba un número y devuelva verdadero cuando sea divisible entre dos. El programa presenta el resultado como texto.','entero numero; logico resultado','logico','EsPar','entero numero','    logico resultado;','    resultado = numero % 2 == 0;\n    retornar resultado;','    entero numero;\n    logico resultado;','    leer(numero);\n    resultado = EsPar(numero);\n    si(resultado) {\n        imprimir("Par");\n    } de otro modo {\n        imprimir("No es par");\n    }',[{in:[8],out:['Par']},{in:[7],out:['No es par']}]),
+  makeFunctionProblem(104,'Promedio de notas usando una función','Un docente registra tres calificaciones en un arreglo. Una función recibe el arreglo, lo recorre con un ciclo y devuelve el promedio del grupo.','flotante notas[3], promedio; entero i','flotante','CalcularPromedioArreglo','flotante notas[3]','    entero i;\n    flotante suma;','    suma = 0;\n    para(i = 0; i < 3; i = i + 1) {\n        suma = suma + notas[i];\n    }\n    retornar suma / 3;','    flotante notas[3], promedio;\n    entero i;','    para(i = 0; i < 3; i = i + 1) {\n        leer(notas[i]);\n    }\n    promedio = CalcularPromedioArreglo(notas);\n    imprimir(promedio);',[{in:[10,20,30],out:['20']},{in:[5,10,15],out:['10']}]),
+  makeFunctionProblem(105,'Salario semanal con horas extra','Una empresa calcula el salario semanal con una función que recibe las horas y la tarifa. Las primeras 40 horas se pagan normal y el excedente a 1.5 veces la tarifa.','entero horas; flotante tarifa, salario','flotante','CalcularSalario','entero horas, flotante tarifa','    flotante salario;','    si(horas > 40) {\n        salario = (40 * tarifa) + ((horas - 40) * tarifa * 1.5);\n    } de otro modo {\n        salario = horas * tarifa;\n    }\n    retornar salario;','    entero horas;\n    flotante tarifa, salario;','    leer(horas);\n    leer(tarifa);\n    salario = CalcularSalario(horas, tarifa);\n    imprimir(salario);',[{in:[45,10],out:['475']},{in:[40,12],out:['480']}]),
+  makeFunctionProblem(106,'Conversión de Celsius a Fahrenheit','Una aplicación meteorológica necesita convertir una temperatura. La función recibe grados Celsius y devuelve el valor Fahrenheit usando F = C × 1.8 + 32.','flotante celsius, fahrenheit','flotante','ConvertirFahrenheit','flotante celsius','    flotante fahrenheit;','    fahrenheit = celsius * 1.8 + 32;\n    retornar fahrenheit;','    flotante celsius, fahrenheit;','    leer(celsius);\n    fahrenheit = ConvertirFahrenheit(celsius);\n    imprimir(fahrenheit);',[{in:[20],out:['68']},{in:[0],out:['32']}]),
+  makeFunctionProblem(107,'Precio de estacionamiento','Un estacionamiento cobra B/.3 hasta dos horas, B/.6 hasta cinco horas y B/.10 por más tiempo. Una función recibe las horas y devuelve el costo.','entero horas; flotante costo','flotante','CalcularEstacionamiento','entero horas','    flotante costo;','    si(horas <= 2) {\n        costo = 3;\n    } de otro modo si(horas <= 5) {\n        costo = 6;\n    } de otro modo {\n        costo = 10;\n    }\n    retornar costo;','    entero horas;\n    flotante costo;','    leer(horas);\n    costo = CalcularEstacionamiento(horas);\n    imprimir(costo);',[{in:[2],out:['3']},{in:[4],out:['6']},{in:[8],out:['10']}]),
+  makeFunctionProblem(108,'Precio final con impuesto','Una tienda reutiliza una función que recibe el precio base y el porcentaje de impuesto, y devuelve el precio final.','flotante precio, impuesto, total','flotante','PrecioConImpuesto','flotante precio, flotante impuesto','    flotante total;','    total = precio + (precio * impuesto / 100);\n    retornar total;','    flotante precio, impuesto, total;','    leer(precio);\n    leer(impuesto);\n    total = PrecioConImpuesto(precio, impuesto);\n    imprimir(total);',[{in:[100,7],out:['107']},{in:[50,5],out:['52.5']}]),
+  makeFunctionProblem(109,'Comisión de venta','Una agente recibe una comisión del 8% sobre cada venta. El programa registra el monto y una función calcula la comisión.','flotante venta, comision','flotante','CalcularComision','flotante venta','    flotante comision;','    comision = venta * 0.08;\n    retornar comision;','    flotante venta, comision;','    leer(venta);\n    comision = CalcularComision(venta);\n    imprimir(comision);',[{in:[250],out:['20']},{in:[1250],out:['100']}]),
+  makeFunctionProblem(110,'Mayor de tres calificaciones','Un docente necesita conocer la nota más alta entre tres evaluaciones. Una función recibe los tres valores y devuelve el mayor.','flotante nota1, nota2, nota3, mayor','flotante','MayorDeTres','flotante nota1, flotante nota2, flotante nota3','    flotante mayor;','    mayor = nota1;\n    si(nota2 > mayor) {\n        mayor = nota2;\n    }\n    si(nota3 > mayor) {\n        mayor = nota3;\n    }\n    retornar mayor;','    flotante nota1, nota2, nota3, mayor;','    leer(nota1);\n    leer(nota2);\n    leer(nota3);\n    mayor = MayorDeTres(nota1, nota2, nota3);\n    imprimir(mayor);',[{in:[75,91,84],out:['91']},{in:[100,65,88],out:['100']}]),
+  makeFunctionProblem(111,'Categoría de calificación','Una plataforma académica convierte una nota en una categoría: "Excelente" desde 90, "Aprobado" desde 71 y "Reprobado" para notas inferiores. Una función devuelve la categoría.','flotante nota; cadena categoria','cadena','CategoriaNota','flotante nota','    cadena categoria;','    si(nota >= 90) {\n        categoria = "Excelente";\n    } de otro modo si(nota >= 71) {\n        categoria = "Aprobado";\n    } de otro modo {\n        categoria = "Reprobado";\n    }\n    retornar categoria;','    flotante nota;\n    cadena categoria;','    leer(nota);\n    categoria = CategoriaNota(nota);\n    imprimir(categoria);',[{in:[92],out:['Excelente']},{in:[75],out:['Aprobado']},{in:[60],out:['Reprobado']}]),
+  makeFunctionProblem(112,'Distancia de un viaje','Una aplicación de transporte calcula la distancia recorrida. Una función recibe la velocidad promedio y el tiempo del viaje, y devuelve la distancia.','flotante velocidad, tiempo, distancia','flotante','CalcularDistancia','flotante velocidad, flotante tiempo','    flotante distancia;','    distancia = velocidad * tiempo;\n    retornar distancia;','    flotante velocidad, tiempo, distancia;','    leer(velocidad);\n    leer(tiempo);\n    distancia = CalcularDistancia(velocidad, tiempo);\n    imprimir(distancia);',[{in:[60,2],out:['120']},{in:[75,1.5],out:['112.5']}]),
+  makeFunctionProblem(113,'Reutilizar una función de conversión','Un laboratorio recibe dos temperaturas en Celsius y desea mostrar ambas en Fahrenheit. El algoritmo debe llamar dos veces a la misma función de conversión.','flotante celsius1, celsius2, f1, f2','flotante','Convertir','flotante celsius','    flotante fahrenheit;','    fahrenheit = celsius * 1.8 + 32;\n    retornar fahrenheit;','    flotante celsius1, celsius2, f1, f2;','    leer(celsius1);\n    leer(celsius2);\n    f1 = Convertir(celsius1);\n    f2 = Convertir(celsius2);\n    imprimir(f1);\n    imprimir(f2);',[{in:[0,100],out:['32','212']},{in:[20,30],out:['68','86']}]),
+  makeFunctionProblem(114,'Área y costo de una alfombra','Una tienda vende alfombras por metro cuadrado. El algoritmo usa una función que recibe el ancho y el largo, devuelve el área y luego calcula el costo según el precio por metro cuadrado.','flotante ancho, largo, precio, area, costo','flotante','CalcularArea','flotante ancho, flotante largo','    flotante area;','    area = ancho * largo;\n    retornar area;','    flotante ancho, largo, precio, area, costo;','    leer(ancho);\n    leer(largo);\n    leer(precio);\n    area = CalcularArea(ancho, largo);\n    costo = area * precio;\n    imprimir(costo);',[{in:[3,4,5],out:['60']},{in:[2.5,2,8],out:['40']}])
+];
+
+
+tasks.push(...newTasks);
+
+let currentTask = null;
+let runtimeReady = false;
+let points = Number.parseInt(localStorage.getItem('dlapro_points') || '0', 10) || 0;
+let solved;
+try { solved = JSON.parse(localStorage.getItem('dlapro_solved') || '[]'); } catch (_) { solved = []; }
+if (!Array.isArray(solved)) solved = [];
+let previousTaskId = null;
+let savedAnswers;
+try { savedAnswers = JSON.parse(localStorage.getItem('dlapro_answers') || '{}'); } catch (_) { savedAnswers = {}; }
+if (!savedAnswers || typeof savedAnswers !== 'object' || Array.isArray(savedAnswers)) savedAnswers = {};
+let deskWork;
+try { deskWork = JSON.parse(localStorage.getItem('dlapro_deskwork') || '{}'); } catch (_) { deskWork = {}; }
+if (!deskWork || typeof deskWork !== 'object' || Array.isArray(deskWork)) deskWork = {};
+const $ = id => document.getElementById(id);
+
+function updateStats() {
+    $('points').innerText = points;
+    $('solved').innerText = solved.length;
+}
+
+const quizBank = [
+ {topic:'basics',kind:'Elige la respuesta correcta',q:'¿Qué tipo de dato usarías para guardar la edad de una persona en años enteros?',choices:['entero','cadena','logico','flotante'],a:0,why:'La edad en años completos se representa con entero. Si admitimos fracciones de año, podría usarse flotante.'},
+ {topic:'basics',kind:'Elige la mejor respuesta',q:'¿Para qué sirve declarar una variable?',choices:['Para reservar un nombre y representar un dato que usará el algoritmo','Para mostrar texto en pantalla','Para repetir instrucciones automáticamente','Para terminar el algoritmo'],a:0,why:'La declaración presenta las variables que el algoritmo necesita y el tipo de dato que guardarán.'},
+ {topic:'basics',kind:'Elige la respuesta correcta',q:'¿Cuál es un valor lógico?',choices:['"hola"','3.5','verdadero','27'],a:2,why:'Un valor lógico representa una de dos posibilidades: verdadero o falso.'},
+ {topic:'basics',kind:'Elige la respuesta correcta',q:'¿Cuál identificador es más claro para guardar el precio de un producto?',choices:['x','precioProducto','dato1','p'],a:1,why:'Un nombre descriptivo hace más fácil entender qué información guarda la variable.'},
+ {topic:'input',kind:'Elige la respuesta correcta',q:'¿Qué instrucción recibe un valor que escribe la persona?',choices:['imprimir(edad);','leer(edad);','si(edad);','edad == 18;'],a:1,why:'leer(edad) captura una entrada y la almacena en la variable edad.'},
+ {topic:'input',kind:'Elige la respuesta correcta',q:'¿Qué instrucción muestra un resultado en pantalla?',choices:['leer(total);','total = 5;','imprimir(total);','para(total);'],a:2,why:'imprimir() muestra texto o valores en la pantalla.'},
+ {topic:'input',kind:'Corrige el código',q:'El algoritmo quiere mostrar el resultado final, pero la última instrucción tiene un error. ¿Qué cambio la corrige?',code:'flotante total;\ntotal = 12.5;\nleer(total);',choices:['Cambiar leer(total) por imprimir(total);','Cambiar total por si(total);','Borrar la declaración','Cambiar flotante por cadena sin comillas'],a:0,why:'El valor ya está calculado; para mostrarlo se usa imprimir(total). leer() sería para recibirlo.'},
+ {topic:'input',kind:'Completa el código',q:'Completa la instrucción que lee el nombre ingresado.',code:'cadena nombre;\n__________',choices:['leer(nombre);','imprimir(nombre);','nombre == leer;','cadena(nombre);'],a:0,why:'La variable declarada es nombre, así que leer(nombre); guarda ahí la entrada.'},
+ {topic:'condition',kind:'Elige la respuesta correcta',q:'¿Qué operador significa “mayor o igual que”?',choices:['<=','==','>=','!='],a:2,why:'>= compara si el valor de la izquierda es mayor o igual al de la derecha.'},
+ {topic:'condition',kind:'Corrige el código',q:'Se quiere aprobar con nota de 71 en adelante. ¿Cuál condición aplica la regla correctamente?',code:'si(__________) {\n    imprimir("Aprobado");\n}',choices:['nota >= 71','nota = 71','nota < 71','nota || 71'],a:0,why:'La comparación >= incluye 71 y cualquier valor mayor.'},
+ {topic:'condition',kind:'Elige la mejor respuesta',q:'¿Qué debería ocurrir si una nota es menor que 71 en un algoritmo con aprobado/reprobado?',choices:['Mostrar Reprobado en el bloque de otro modo','Volver a leer la nota sin parar','Cambiar la nota a 71','No declarar ninguna variable'],a:0,why:'El bloque de otro modo cubre los casos donde la condición de aprobación es falsa.'},
+ {topic:'condition',kind:'Elige la respuesta correcta',q:'¿Qué compara el operador ==?',choices:['Asigna un valor a una variable','Comprueba si dos valores son iguales','Suma dos valores','Indica que un valor es mayor'],a:1,why:'== es una comparación de igualdad. El signo = asigna un valor.'},
+ {topic:'logic',kind:'Elige la respuesta correcta',q:'En una condición, ¿qué significa &&?',choices:['O: basta con que una condición sea verdadera','Y: ambas condiciones deben ser verdaderas','No: invierte una condición','Igual: compara dos valores'],a:1,why:'&& representa Y lógico; la expresión completa es verdadera cuando ambas condiciones lo son.'},
+ {topic:'logic',kind:'Elige la respuesta correcta',q:'¿Qué significa || en una condición?',choices:['Y lógico','O lógico','Asignación','Residuo'],a:1,why:'|| representa O lógico; basta con que una de las condiciones sea verdadera.'},
+ {topic:'logic',kind:'Elige la mejor respuesta',q:'¿Cuál es el orden más claro para resolver un problema algorítmico?',choices:['Mostrar un resultado, luego adivinar datos','Identificar entradas, procesarlas y mostrar salidas','Declarar solo variables y terminar','Repetir todas las instrucciones siempre'],a:1,why:'Los algoritmos suelen recibir datos, procesarlos con operaciones o decisiones y presentar resultados.'},
+ {topic:'logic',kind:'Corrige el código',q:'La variable fue declarada como cadena, pero la comparación la trata como un número. ¿Qué opción conserva el significado de “clave secreta 1234”?',code:'cadena clave;\nleer(clave);\nsi(clave == ________) { imprimir("Acceso"); }',choices:['"1234"','1234.0','clave','leer'],a:0,why:'Una clave alfanumérica es texto; se escribe entre comillas para compararla como cadena.'},
+ {topic:'complete',kind:'Completa el código',q:'Completa la asignación que calcula el área de un rectángulo.',code:'flotante largo, ancho, area;\narea = __________;',choices:['largo * ancho','largo + ancho','largo / ancho','largo == ancho'],a:0,why:'El área de un rectángulo se obtiene multiplicando largo por ancho.'},
+ {topic:'complete',kind:'Completa el código',q:'Completa la estructura para mostrar “Mayor” cuando edad sea al menos 18.',code:'si(edad __________ 18) { imprimir("Mayor"); }',choices:['>=','==','&&','='],a:0,why:'>= permite incluir exactamente 18 y todas las edades superiores.'},
+ {topic:'complete',kind:'Completa el código',q:'Completa el bloque alternativo para imprimir “Menor”.',code:'si(edad >= 18) { imprimir("Mayor"); }\n__________ { imprimir("Menor"); }',choices:['de otro modo','sino si','leer','retornar'],a:0,why:'de otro modo ejecuta el bloque cuando edad >= 18 es falso.'},
+ {topic:'repair',kind:'Corrige el código',q:'Encuentra la corrección para esta condición: la palabra sino no pertenece a la sintaxis de esta herramienta.',code:'si(nota >= 71) { imprimir("Aprobado"); } sino { imprimir("Reprobado"); }',choices:['Cambiar sino por de otro modo','Cambiar si por leer','Quitar las llaves','Cambiar >= por ='],a:0,why:'La sintaxis de la herramienta usa de otro modo para la alternativa.'},
+ {topic:'repair',kind:'Corrige el código',q:'La instrucción de asignación está incompleta. ¿Qué versión termina correctamente la sentencia?',code:'entero doble;\ndoble = 2 * 8',choices:['doble = 2 * 8;','leer doble = 2 * 8;','doble == 2 * 8;','imprimir = doble;'],a:0,why:'Una asignación usa = y termina con punto y coma.'},
+ {topic:'repair',kind:'Elige la mejor respuesta',q:'El algoritmo no imprime nada aunque calcula el total. ¿Qué debes revisar primero?',choices:['Que exista una instrucción imprimir(total);','Que la variable tenga un nombre de una letra','Que todas las variables sean cadena','Que el programa tenga más llaves'],a:0,why:'Calcular un valor no lo muestra automáticamente; debes imprimirlo.'}
+];
+let quizCurrent = null, quizAnswered = false, quizCorrect = Number.parseInt(localStorage.getItem('dlapro_quiz_correct') || '0', 10) || 0;
+function nextQuizQuestion() {
+    const topic = $('quizTopic').value;
+    let pool = quizBank.filter(item => topic === 'all' || item.topic === topic);
+    if (!pool.length) pool = quizBank;
+    const available = pool.filter(item => item !== quizCurrent);
+    quizCurrent = (available.length ? available : pool)[Math.floor(Math.random() * (available.length || pool.length))];
+    quizAnswered = false;
+    $('quizKind').textContent = quizCurrent.kind;
+    $('quizQuestion').textContent = quizCurrent.q;
+    $('quizCode').textContent = quizCurrent.code || '';
+    $('quizCode').style.display = quizCurrent.code ? 'block' : 'none';
+    $('quizChoices').innerHTML = quizCurrent.choices.map((choice, i) => '<label class="quiz-choice"><input type="radio" name="quizAnswer" value="' + i + '">' + escapeHTML(choice) + '</label>').join('');
+    $('quizFeedback').style.display = 'none';
+    $('submitQuiz').style.display = 'inline-block';
+    $('nextQuiz').style.display = 'none';
+    $('quizProgress').textContent = 'Respuestas correctas: ' + quizCorrect;
+}
+function closeBeginnerMode() {
+    $('beginnerPanel').style.display = 'none';
+    const practicePanel = document.querySelector('.work:not(.beginner-panel)');
+    if (practicePanel) practicePanel.style.display = 'block';
+    $('beginnerMode').setAttribute('aria-pressed', 'false');
+}$('beginnerMode').addEventListener('click', () => {
+    document.querySelector('.work:not(.beginner-panel)').style.display = 'none';
+    $('beginnerPanel').style.display = 'block';
+    $('beginnerMode').setAttribute('aria-pressed', 'true');
+    if (!quizCurrent) nextQuizQuestion();
+});
+$('exitBeginner').addEventListener('click', closeBeginnerMode);
+$('quizTopic').addEventListener('change', nextQuizQuestion);
+$('submitQuiz').addEventListener('click', () => {
+    if (!quizCurrent || quizAnswered) return;
+    const selected = document.querySelector('input[name="quizAnswer"]:checked');
+    const feedback = $('quizFeedback');
+    if (!selected) {
+        feedback.className = 'feedback warning';
+        feedback.textContent = 'Elige una respuesta antes de comprobar.';
+        feedback.style.display = 'block';
+        return;
+    }
+    quizAnswered = true;
+    const correct = Number(selected.value) === quizCurrent.a;
+    if (correct) {
+        quizCorrect++;
+        localStorage.setItem('dlapro_quiz_correct', String(quizCorrect));
+    }
+    feedback.className = 'feedback ' + (correct ? 'good' : 'bad');
+    feedback.textContent = (correct ? '✅ ¡Correcto! ' : '❌ Todavía no. La respuesta correcta es: ' + quizCurrent.choices[quizCurrent.a] + '. ') + quizCurrent.why;
+    feedback.style.display = 'block';
+    $('quizChoices').querySelectorAll('input').forEach(input => input.disabled = true);
+    $('submitQuiz').style.display = 'none';
+    $('nextQuiz').style.display = 'inline-block';
+    $('quizProgress').textContent = 'Respuestas correctas: ' + quizCorrect;
+});
+$('nextQuiz').addEventListener('click', nextQuizQuestion);
+function parseInputValues(inputStr) {
+    return String(inputStr || '').split(',').map(raw => {
+        const value = raw.trim();
+        if (!value) return '';
+        if (isNaN(value)) return value.replace(/^['"]|['"]$/g, '');
+        return Number(value);
+    }).filter(value => value !== '');
+}
+
+function currentDeskKey() { return String(currentTask ? currentTask.id : 'none'); }
+
+function declaredDeskVariables(source) {
+    const clean = String(source || '').replace(/"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g, ' ').replace(/\/\/.*$/gm, '');
+    const vars = [];
+    const declaration = /^\s*(?:entero|flotante|cadena|caracter|logico)\s+([^;]+);/gim;
+    let match;
+    while ((match = declaration.exec(clean))) {
+        for (const item of match[1].split(',')) {
+            const name = item.trim().match(/^([A-Za-z_]\w*)/);
+            if (name && !vars.includes(name[1])) vars.push(name[1]);
+        }
+    }
+    return vars;
+}
+
+function currentDeskSource() { return $('answer').value; }
+
+function buildDeskTrace(source, inputs, output) {
+    const vars = declaredDeskVariables(source), width = vars.length + 4;
+    const state = Object.fromEntries(vars.map(name => [name, '?']));
+    const sourceLines = String(source || '').split(/\r?\n/).filter(raw => {
+        const line = raw.trim();
+        return line && !line.startsWith('//') && !/^Algoritmo\b/i.test(line) && line !== '{' && line !== '}' &&
+            !/^(?:entero|flotante|cadena|caracter|logico)\b[^;]*;$/i.test(line);
+    });
+    let inputIndex = 0, outputIndex = 0;
+    const rows = [];
+    const safeArithmetic = expression => {
+        const expr = expression.trim();
+        if (!/^[A-Za-z_\w\s.+*/%()\-]+$/.test(expr)) return '?';
+        const names = Array.from(expr.matchAll(/[A-Za-z_]\w*/g), m => m[0]).filter((n, i, a) => a.indexOf(n) === i);
+        if (names.some(name => !Object.hasOwn(state, name) || state[name] === '?' || !Number.isFinite(Number(state[name])))) return '?';
+        try {
+            const value = Function(...names, '"use strict"; return (' + expr + ');')(...names.map(n => Number(state[n])));
+            return Number.isFinite(value) ? String(Number(value.toPrecision(12))) : '?';
+        } catch (_) { return '?'; }
+    };
+    sourceLines.forEach((raw, index) => {
+        const line = raw.trim(), row = Array(width).fill('?');
+        row[0] = String(index + 3);
+        const readMatch = line.match(/^leer\(\s*([A-Za-z_]\w*)\s*\);?$/i);
+        const assignment = line.match(/^([A-Za-z_]\w*)\s*=\s*(.+);$/);
+        let arithmetic = '', logic = '', screen = '';
+        const condition = line.match(/^si\s*\((.*)\)/i);
+        if (readMatch && Object.hasOwn(state, readMatch[1])) {
+            state[readMatch[1]] = inputIndex < inputs.length ? String(inputs[inputIndex++]) : '?';
+            screen = String(state[readMatch[1]]) + ' ↵';
+        }
+        else if (assignment && Object.hasOwn(state, assignment[1])) {
+            const expression = assignment[2];
+            state[assignment[1]] = /^(['"]).*\1$/.test(expression.trim()) ? expression.trim().slice(1, -1) : safeArithmetic(expression);
+            arithmetic = assignment[1] + ' = ' + expression.replace(/;$/, '');
+            if (state[assignment[1]] !== '?') arithmetic += ' → ' + state[assignment[1]];
+        }
+        if (condition) {
+            const test = condition[1];
+            const masked = test.replace(/"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g, ' ');
+            const names = Array.from(masked.matchAll(/[A-Za-z_]\w*/g), m => m[0]).filter((n, i, a) => a.indexOf(n) === i);
+            const ready = names.every(name => Object.hasOwn(state, name) && state[name] !== '?' && !(state[name] && typeof state[name] === 'object'));
+            if (ready && /^[A-Za-z_\w\s\d<>=!&|().+*/%'"-]+$/.test(test)) {
+                try {
+                    const result = Function(...names, '"use strict"; return Boolean(' + test + ');')(...names.map(name => state[name]));
+                    logic = '(' + test + ') → ' + (result ? 'verdadero' : 'falso');
+                } catch (_) { logic = 'Evaluar: ' + test + ' → ?'; }
+            } else logic = 'Evaluar: ' + test + ' → ?';
+        }
+        if (/^imprimir\(/i.test(line) && outputIndex < output.length) screen = String(output[outputIndex++]);
+        vars.forEach((name, i) => row[i + 1] = state[name] === undefined ? '?' : String(state[name]));
+        row[vars.length + 1] = arithmetic;
+        row[vars.length + 2] = logic;
+        row[vars.length + 3] = screen;
+        rows.push(row);
+    });
+    return rows.length ? rows : [Array(width).fill('?')];
+}
+
+function renderDeskTable() {
+    const key = currentDeskKey(), vars = declaredDeskVariables(currentDeskSource());
+    const width = Math.max(1, vars.length) + 4;
+    $('deskHead').innerHTML = '<tr><th rowspan="2">N<br><small>Instrucción</small></th><th colspan="' + Math.max(1, vars.length) + '">Memoria</th><th colspan="2">Unidad</th><th rowspan="2">Pantalla</th></tr><tr>' +
+        vars.map((_, i) => '<th class="memory-column">V' + (i + 1) + '</th>').join('') +
+        (vars.length ? '' : '<th class="memory-column">Variables</th>') + '<th>Aritmética</th><th>Lógica</th></tr>';
+    let rows = Array.isArray(deskWork[key]) ? deskWork[key] : [];
+    if (!rows.length) rows = Array.from({length:8}, () => Array(width).fill(''));
+    rows = rows.map(row => {
+        if (!Array.isArray(row) || row.length !== 10 || width === 10) return row;
+        return [row[0] || '', ...Array.from({length:vars.length}, (_, i) => i < 6 ? (row[i + 1] || '') : ''),
+            row[7] || '', row[8] || '', row[9] || ''];
+    });
+    deskWork[key] = rows;
+    localStorage.setItem('dlapro_deskwork', JSON.stringify(deskWork));    $('deskBody').innerHTML = rows.map((row, rowIndex) => '<tr>' + Array.from({length:width}, (_, colIndex) => {
+        const value = Array.isArray(row) ? String(row[colIndex] || '') : '';
+        return '<td contenteditable="true" spellcheck="false" aria-label="Renglón ' + (rowIndex+1) + ', columna ' + (colIndex+1) + '" id="deskCell_' + rowIndex + '_' + colIndex + '">' + escapeHTML(value) + '</td>';
+    }).join('') + '</tr>').join('');
+    Array.from({length:rows.length}, (_, rowIndex) => Array.from({length:width}, (_, colIndex) => {
+        const cell = $('deskCell_' + rowIndex + '_' + colIndex);
+        if (cell) cell.addEventListener('input', () => {
+            const updated = Array.isArray(deskWork[key]) ? deskWork[key] : [];
+            while (updated.length <= rowIndex) updated.push(Array(width).fill(''));
+            while (updated[rowIndex].length < width) updated[rowIndex].push('');
+            updated[rowIndex][colIndex] = cell.textContent;
+            deskWork[key] = updated;
+            localStorage.setItem('dlapro_deskwork', JSON.stringify(deskWork));
+        });
+    }));
+}
+function applyActivityMode() {
+    if (!currentTask) return;
+    const mode = $('activityMode').value;
+    const isDesk = mode !== 'code';
+    $('desktopPanel').style.display = isDesk ? 'block' : 'none';
+    $('deskFeedback').className = 'feedback neutral';
+    $('deskFeedback').innerText = 'Escribe tu algoritmo y los datos. La tabla mostrará solo las variables declaradas y dejará ? donde el valor todavía no se conoce.';
+    $('answer').style.display = 'block';
+    $('codeLabel').style.display = 'block';
+    $('codeActions').style.display = 'flex';
+    $('feedback').style.display = 'block';
+    $('testsBox').style.display = 'block';
+    $('runtimePanel').style.display = !runtimeReady ? 'none' : 'block';
+    $('deskCodeContainer').style.display = 'none';
+    $('deskInputsArea').style.display = currentTask.id === 'clase' ? 'none' : 'block';
+
+    if (currentTask.id !== 'clase') {
+        const tests = currentTask.tests || [];
+        $('deskCase').innerHTML = tests.map((test, index) => `<option value="${index}">Caso ${index+1}</option>`).join('');
+        $('deskCase').style.display = tests.length > 1 ? 'block' : 'none';
+        if (tests.length && !$('deskInputs').value) $('deskInputs').value = tests[0].in.join(', ');
+    } else {
+        $('deskCase').style.display = 'none';
+    }
+    renderDeskTable();
+}
+
+function renderTaskList() {
+    const panel = $('taskListPanel');
+    if ($('level').value === 'clase') { panel.style.display = 'none'; return; }
+    panel.style.display = 'block';
+    const levelTasks = tasks.filter(task => task.l === Number($('level').value));
+    const completed = levelTasks.filter(task => solved.includes(task.id)).length;
+    $('taskListTitle').innerText = `Retos del Nivel ${$('level').value}`;
+    $('taskListSummary').innerText = `${completed} de ${levelTasks.length} completados · selecciona uno para abrirlo`;
+    $('taskList').innerHTML = levelTasks.map((task, index) => {
+        const isSolved = solved.includes(task.id);
+        const hasAnswer = typeof savedAnswers[task.id] === 'string' && savedAnswers[task.id].trim();
+        const isCurrent = currentTask && currentTask.id === task.id;
+        const status = isSolved ? (hasAnswer ? '✓ Guardado' : '✓ Hecho') : '○ Pendiente';
+        return `<button type="button" class="task-list-item${isSolved ? ' is-solved' : ''}${isCurrent ? ' is-current' : ''}" id="openTask${task.id}" aria-current="${isCurrent ? 'true' : 'false'}"><span class="task-list-status">${status}</span><span class="task-list-name">Reto ${index + 1}: ${escapeHTML(task.title)}</span></button>`;
+    }).join('');
+    levelTasks.forEach(task => {
+        const button = $('openTask' + task.id);
+        if (button) button.addEventListener('click', () => loadTask(task.id));
+    });
+}
+
+function loadTask(taskId = null) {
+    closeBeginnerMode();
+    let level = $('level').value;
+    $('answer').value = '';
+    $('deskInputs').value = '';
+    runtimeReady = false;
+    $('runtimePanel').style.display = 'none';
+    $('clearAnswer').style.display = 'none';
+    $('testsBox').innerHTML = '';
+    runtimeReady = false;
+    $('runtimePanel').style.display = 'none';
+    $('runtimeOutput').textContent = 'La salida del algoritmo aparecerá aquí.';
+    
+    if (level === 'clase') {
+        currentTask = { id: 'clase', l: 'clase' };
+        $('taskTitle').innerText = 'Laboratorio de Clase';
+        $('taskBadge').innerText = 'Modo Libre';
+        $('taskBadge').style.background = 'var(--class)';
+        $('taskBadge').style.color = '#fff';
+        
+        $('lblStatement').innerText = 'Enunciado del Profesor (Escribe o pega aquí)';
+        $('statementContainer').innerHTML = '<textarea id="classStatement" placeholder="Pega aquí el problema que les dictó el profesor..." style="min-height: 80px; width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px; color: white; resize: vertical; font-family: \'Inter\', sans-serif;"></textarea>';
+        
+        $('varsDetails').open = true;
+        $('lblVars').innerText = 'Datos para ejecutar (no escribas nombres de variables)';
+        $('varsContainer').innerHTML = '<input type="text" id="classInputs" placeholder="Valores que leerá el algoritmo, en orden; Ej: 10, 25, si" autocomplete="off"><small class="field-help">Escribe valores de ejemplo separados por coma. No tienes que volver a declarar aquí las variables del pseudocódigo.</small><label for="classExpected" style="margin-top:12px;">Salida esperada (opcional)</label><input type="text" id="classExpected" placeholder="Ej: Aprobado | 150" autocomplete="off"><small class="field-help">Si la completas, compara la salida del programa con el resultado esperado. Separa varios resultados con |.</small>';
+        
+        $('answer').value = '//Bloque declarativo de variables\n\n\n//Bloque de instrucciones\n';
+        
+        $('check').innerText = '▶️ Ejecutar mi Código';
+        $('hint').style.display = 'none';
+        $('solution').innerText = '🤖 Obtener Solución por IA';
+        
+        $('feedback').className = 'feedback neutral';
+        $('feedback').innerText = 'MODO CLASE: Escribe el problema, programa tu código y pon valores de prueba para verificar si compila y ejecuta bien.';
+    } else {
+        $('hint').style.display = 'block';
+        $('check').innerText = '⚡ Ejecutar y Evaluar';
+        $('solution').innerText = '👀 Ver Solución';
+        $('taskBadge').style.background = '#1e3a8a';
+        $('taskBadge').style.color = '#bfdbfe';
+        
+        let available = tasks.filter(t => t.l === parseInt(level));
+        let choices = available.length > 1 && previousTaskId !== null ? available.filter(t => t.id !== previousTaskId) : available;
+        currentTask = taskId ? available.find(t => t.id === Number(taskId)) : choices[Math.floor(Math.random() * choices.length)];
+        if (!currentTask) currentTask = choices[Math.floor(Math.random() * choices.length)];
+        previousTaskId = currentTask.id;
+        $('answer').value = typeof savedAnswers[currentTask.id] === 'string' ? savedAnswers[currentTask.id] : '';
+        if (currentTask.l === 6 && !$('answer').value) $('answer').value = 'flotante CalcularPago(entero horas) {\n    flotante pago;\n    pago = horas * 12.50;\n    retornar pago;\n}\n\nAlgoritmo HorasExtras {\n    //Bloque declarativo de variables\n    entero horas;\n    flotante pago;\n    //Bloque de instrucciones\n    imprimir("Ingrese horas extra:");\n    leer(horas);\n    pago = CalcularPago(horas);\n    imprimir(pago);\n}';
+        $('clearAnswer').style.display = savedAnswers[currentTask.id] ? 'block' : 'none';
+        $('taskTitle').innerText = currentTask.title;
+        const levelCount = tasks.filter(t => t.l === currentTask.l).length;
+        const mastered = tasks.filter(t => t.l === currentTask.l && solved.includes(t.id)).length;
+        $('taskBadge').innerText = `Nivel ${currentTask.l} · ${mastered}/${levelCount} dominados`;
+        
+        $('lblStatement').innerText = 'Misión Lógica';
+        $('statementContainer').innerText = currentTask.statement;
+        
+        $('varsDetails').open = false;
+        $('lblVars').innerText = 'Variables Sugeridas';
+        $('varsContainer').innerText = currentTask.vars;
+        
+        $('feedback').className = 'feedback neutral';
+        $('feedback').innerText = 'Escribe tu pseudocódigo y presiona Ejecutar. Si te trabas, usa Analizar Error.';
+    }
+    updateStats();
+    renderTaskList();
+    applyActivityMode();
+}
+
+function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+}
+
+function extractReadVariables(src) {
+    const code = extractPseudoFunctions(String(src)).code.replace(/"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g, ' ')
+        .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+    const types = {};
+    const typeRx = /\b(entero|flotante|cadena|caracter|logico)\s+([^;\n{}]+)/gi;
+    let match;
+    while ((match = typeRx.exec(code))) {
+        const type = match[1].toLowerCase();
+        match[2].split(',').forEach(part => {
+            const name = part.trim().split('=')[0].trim().match(/^([A-Za-z_]\w*)(?:\s*\[[^\]]+\])?$/);
+            if (name) types[name[1]] = type;
+        });
+    }
+    const reads = [];
+    const readRx = /\bleer\s*\(\s*([A-Za-z_]\w*)\s*(?:\[\s*[A-Za-z_]\w*\s*\])?\s*\)/gi;
+    while ((match = readRx.exec(code))) reads.push({ name: match[1], type: types[match[1]] || 'desconocido' });
+    return reads;
+}
+
+function alignTestInputs(candidateSrc, referenceSrc, inputs) {
+    const candidateReads = extractReadVariables(candidateSrc);
+    const referenceReads = extractReadVariables(referenceSrc);
+    if (candidateReads.length !== inputs.length || referenceReads.length !== inputs.length ||
+        candidateReads.some(r => r.type === 'desconocido') || referenceReads.some(r => r.type === 'desconocido')) {
+        return { values: inputs.slice(), reads: candidateReads };
+    }
+    const pools = new Map();
+    referenceReads.forEach((read, index) => {
+        if (!pools.has(read.type)) pools.set(read.type, []);
+        pools.get(read.type).push(inputs[index]);
+    });
+    const sameTypes = [...pools].every(([type, values]) => values.length === candidateReads.filter(r => r.type === type).length);
+    if (!sameTypes) return { values: inputs.slice(), reads: candidateReads };
+    const used = new Map();
+    const values = candidateReads.map(read => {
+        const index = used.get(read.type) || 0;
+        used.set(read.type, index + 1);
+        return pools.get(read.type)[index];
+    });
+    // Aceptar concordancia de género en valores de texto (por ejemplo, roja/rojo)
+    // si el algoritmo usa explícitamente una de esas dos formas.
+    const candidateWords = [...String(candidateSrc).matchAll(/"((?:\\.|[^"\\])*)"/g)].map(m => m[1]);
+    for (let i = 0; i < values.length; i++) {
+        if (typeof values[i] !== 'string') continue;
+        const original = values[i];
+        const variant = candidateWords.find(word => word.toLowerCase() === original.toLowerCase() ||
+            (/^[\p{L}]+[oa]$/iu.test(word) && /^[\p{L}]+[oa]$/iu.test(original) &&
+             word.slice(0, -1).toLowerCase() === original.slice(0, -1).toLowerCase()));
+        if (variant) values[i] = variant;
+    }
+    return { values, reads: candidateReads };
+}
+
+function inputAssignmentLabel(reads, values) {
+    if (!reads.length || reads.length !== values.length) return `[${values.join(', ')}]`;
+    return reads.map((read, i) => `${read.name}=${values[i]}`).join(', ');
+}
+
+function normalizeTextForMatch(value) {
+    return String(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+        .replace(/[^a-z0-9_.+-]+/g, ' ').trim().split(/\s+/).filter(Boolean);
+}
+
+function isPromptLine(line) {
+    return /^(?:ingrese|indique|escriba|digite|introduzca|proporcione|seleccione|ingresar|introducir)\b/i.test(String(line).trim());
+}
+
+function validateOutput(actualArr, expArr, source = '') {
+    const promptTexts = new Set();
+    const code = String(source).replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+    const promptRx = /imprimir\s*\(\s*"((?:\\.|[^"\\])*)"\s*\)\s*;?\s*leer\s*\(/gi;
+    let promptMatch;
+    while ((promptMatch = promptRx.exec(code))) promptTexts.add(promptMatch[1].replace(/\\"/g, '"').trim().toLowerCase());
+    const output = actualArr.filter(line => {
+        const text = String(line).trim();
+        return !isPromptLine(text) && !promptTexts.has(text.toLowerCase());
+    });
+    const genericWords = new Set(['el','la','los','las','un','una','de','del','al','es','son','fue','sera','seran','resultado','estado','paciente','atencion','mensaje','valor','total','final','salida','programa','numero','la','se','encuentra','queda','para','con','por','favor','ha','sido','obtuvo','es','debe']);
+    const negationWords = new Set(['no','nunca','sin','denegado','denegada','rechazado','rechazada','incorrecto','incorrecta','reprobado','reprobada']);
+    let cursor = 0;
+    for (const expected of expArr) {
+        const expectedText = String(expected).trim();
+        const expectedNumber = Number(expectedText);
+        let found = false;
+        for (; cursor < output.length; cursor++) {
+            const actualText = String(output[cursor]).trim();
+            const actualNumber = Number(actualText);
+            if (expectedText !== '' && Number.isFinite(expectedNumber)) {
+                const numericTokens = actualText.match(/[-+]?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?/gi) || [];
+                const tolerance = 1e-9 * Math.max(1, Math.abs(expectedNumber));
+                if (numericTokens.some(token => Math.abs(Number(token) - expectedNumber) <= tolerance)) { found = true; cursor++; break; }
+            } else {
+                const normalizedExpected = normalizeTextForMatch(expectedText).join(' ');
+                const normalizedActual = normalizeTextForMatch(actualText).join(' ');
+                const expectedTokens = normalizeTextForMatch(expectedText).filter(token => !genericWords.has(token));
+                const actualTokens = normalizeTextForMatch(actualText);
+                const expectedNegation = expectedTokens.some(token => negationWords.has(token));
+                const actualNegation = actualTokens.some(token => negationWords.has(token));
+                const relaxedMatch = expectedTokens.length > 0 && expectedTokens.every(token => actualTokens.includes(token));
+                if ((normalizedActual.includes(normalizedExpected) || relaxedMatch) && expectedNegation === actualNegation) { found = true; cursor++; break; }
+            }
+        }
+        if (!found) return false;
+    }
+    return true;
+}
+function extractPseudoFunctions(source) {
+    const definitions = [];
+    const pattern = /\b(?:(?:funci[oó]n)\s+)?(entero|flotante|cadena|caracter|logico)\s+([A-Za-z_]\w*)\s*\(([^)]*)\)\s*\{/gi;
+    let code = String(source), match;
+    while ((match = pattern.exec(code))) {
+        const opening = pattern.lastIndex - 1;
+        let depth = 1, cursor = opening + 1;
+        while (cursor < code.length && depth > 0) {
+            if (code[cursor] === '{') depth++;
+            else if (code[cursor] === '}') depth--;
+            cursor++;
+        }
+        if (depth !== 0) throw new Error(`La función ${match[2]} no tiene todas sus llaves de cierre.`);
+        const params = match[3].split(',').map(param => {
+            const parsed = param.trim().match(/(?:(?:entero|flotante|cadena|caracter|logico)\s+)?([A-Za-z_]\w*)(?:\s*\[\s*\d+\s*\])?$/i);
+            return parsed ? parsed[1] : '';
+        }).filter(Boolean);
+        if (match[3].trim() && params.length !== match[3].split(',').length) throw new Error(`Revisa los parámetros de la función ${match[2]}.`);
+        definitions.push({name:match[2], returnType:match[1].toLowerCase(), params, body:code.slice(opening + 1, cursor - 1), start:match.index, end:cursor});
+        pattern.lastIndex = match.index;
+        code = code.slice(0, match.index) + `__DLA_FUNCTION_${definitions.length - 1}__` + code.slice(cursor);
+        pattern.lastIndex = match.index + `__DLA_FUNCTION_${definitions.length - 1}__`.length;
+    }
+    return {code, definitions};
+}
+
+function transpilePseudoBlock(source, reservedNames = []) {
+    let code = source;
+    const declarations = [];
+    code = code.replace(/\b(entero|flotante|cadena|caracter|logico)\s+([^;\n{}]+);?/gi, (whole, type, list) => {
+        list.split(',').forEach(part => {
+            const arrayDeclaration = part.trim().match(/^([A-Za-z_]\w*)\s*\[\s*(\d+)\s*\]$/);
+            const declaration = part.trim().match(/^([A-Za-z_]\w*)(?:\s*=\s*([\s\S]+))?$/);
+            if (!arrayDeclaration && !declaration) return;
+            const name = arrayDeclaration ? arrayDeclaration[1] : declaration[1];
+            const initializer = arrayDeclaration
+                ? ` = Array(${Number(arrayDeclaration[2])}).fill(${type === 'cadena' || type === 'caracter' ? "''" : type === 'logico' ? 'false' : '0'})`
+                : declaration[2] ? ` = ${declaration[2].trim()}` : '';
+            if (reservedNames.includes(name)) throw new Error(`El parámetro ${name} no debe volver a declararse dentro de la función.`);
+            if (!declarations.some(item => item.name === name)) declarations.push({name, initializer});
+        });
+        return '';
+    });
+    code = code.replace(/\bde\s+otro\s+modo\s+si\s*\(/gi, 'else if (')
+        .replace(/\bde\s+otro\s+modo\b/gi, 'else')
+        .replace(/\bsi\s*\(/gi, 'if (')
+        .replace(/\bpara\s*\(/gi, 'for (')
+        .replace(/\bfor\s*\(([^)]*)\)\s*\{/g, 'for ($1) { __tick();')
+        .replace(/\bleer\s*\(\s*([A-Za-z_]\w*)\s*(\[\s*[A-Za-z_]\w*\s*\])?\s*\)\s*;?/gi, (_, variable, index = '') => `${variable}${index} = __read();`)
+        .replace(/\bimprimir\s*\(/gi, '__print(')
+        .replace(/\bretornar\b/gi, 'return')
+        .replace(/\bverdadero\b/gi, 'true')
+        .replace(/\bfalso\b/gi, 'false');
+    return {declarations, code};
+}
+
+function runPseudo(src, inputs) {
+    // Proteger cadenas: los comentarios y palabras reservadas nunca las alteran.
+    const stringLiterals = [];
+    let protectedCode = String(src).replace(/"(?:\\.|[^"\\])*"/g, literal => {
+        const token = `__DLA_STRING_${stringLiterals.length}__`;
+        stringLiterals.push(literal);
+        return token;
+    });
+    protectedCode = protectedCode.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+    if (/\b(sino|inicio|final|real)\b/i.test(protectedCode)) {
+        throw new Error('ESTILO INCORRECTO: Revisa tu código, usaste "sino", "inicio", "final" o "real". Toca en "Analizar Error" para ver en qué línea.');
+    }
+
+    const extracted = extractPseudoFunctions(protectedCode);
+    let code = extracted.code.replace(/\bAlgoritmo\s+[A-Za-z_]\w*\s*/gi, '');
+    const main = transpilePseudoBlock(code);
+    const functions = extracted.definitions.map(fn => {
+        const body = transpilePseudoBlock(fn.body, fn.params);
+        if (!/\breturn\b/.test(body.code)) throw new Error(`La función ${fn.name} debe devolver un valor con retornar.`);
+        const params = fn.params.join(',');
+        const localDecl = body.declarations.length ? 'let ' + body.declarations.map(d => d.name + d.initializer).join(',') + ';' : '';
+        return `function ${fn.name}(${params}) { ${localDecl}\n${body.code}\n}`;
+    });
+    const combined = functions.join('\n') + '\n' + main.code.replace(/__DLA_FUNCTION_\d+__/g, '');
+    const restored = combined.replace(/__DLA_STRING_(\d+)__/g, (_, index) => stringLiterals[Number(index)]);
+
+    let pos = 0, out = [], iterations = 0;
+    function __read() {
+        if (pos >= inputs.length) throw new Error('Ejecución detenida: Tu algoritmo necesita más datos de los que introdujiste en los valores de prueba.');
+        return inputs[pos++];
+    }
+    function __print(...args) { out.push(args.join(' ')); }
+    function __tick() {
+        iterations++;
+        if (iterations > 200000) throw new Error('Ejecución detenida: el ciclo superó el límite de 200,000 iteraciones. Revisa la condición y el incremento del para().');
+    }
+    try {
+        const globalDecl = main.declarations.length ? 'let ' + main.declarations.map(d => d.name + d.initializer).join(',') + ';' : '';
+        new Function('__read', '__print', '__tick', '"use strict"; ' + globalDecl + '\n' + restored)(__read, __print, __tick);
+    } catch (e) {
+        throw new Error('Error de sintaxis o ejecución: ' + e.message);
+    }
+    return out;
+}
+
+function prepareRuntimeConsole(source) {
+    const select = $('runtimeCase');
+    const tests = currentTask && currentTask.id !== 'clase' ? currentTask.tests : [];
+    select.innerHTML = '<option value="custom">Valores propios</option>' + tests.map((test, index) => `<option value="case-${index}">Usar entradas del caso ${index + 1}</option>`).join('');
+    if (tests.length) {
+        select.value = 'case-0';
+        const aligned = alignTestInputs(source, currentTask.solution, tests[0].in);
+        $('runtimeInputs').value = aligned.values.join(', ');
+    } else {
+        select.value = 'custom';
+        $('runtimeInputs').value = '';
+    }
+    $('runtimeOutput').textContent = 'Listo para ejecutar. Cambia las entradas o elige un caso del problema.';
+}
+
+function loadRuntimeCase() {
+    const value = $('runtimeCase').value;
+    if (!value.startsWith('case-') || !currentTask || currentTask.id === 'clase') return;
+    const index = Number(value.slice(5));
+    const test = currentTask.tests[index];
+    if (!test) return;
+    const aligned = alignTestInputs($('answer').value, currentTask.solution, test.in);
+    $('runtimeInputs').value = aligned.values.join(', ');
+    $('runtimeOutput').textContent = `Entradas del caso ${index + 1} cargadas. Presiona Ejecutar para volver a probarlas.`;
+}
+
+$('runtimeCase').addEventListener('change', loadRuntimeCase);
+$('runRuntime').addEventListener('click', () => {
+    if (!runtimeReady) return;
+    try {
+        const values = parseInputValues($('runtimeInputs').value);
+        const output = runPseudo($('answer').value, values);
+        $('runtimeOutput').textContent = output.length ? output.join('\n') : '(El algoritmo terminó sin imprimir resultados.)';
+    } catch (error) {
+        $('runtimeOutput').textContent = 'Error de ejecución: ' + error.message;
+    }
+});
+
+$('analyze').addEventListener('click', () => {
+    let code = $('answer').value;
+    let lines = code.split('\n');
+    let errors = [];
+    let hasDecl = false;
+    let hasInst = false;
+    let openBraces = 0;
+    let closeBraces = 0;
+
+    for (let i = 0; i < lines.length; i++) {
+        let lineNum = i + 1;
+        let line = lines[i].trim();
+        if (!line) continue;
+
+        if (/^\/\/.*\b(declarativ[oa]|variables)\b/i.test(line)) hasDecl = true;
+        if (/^\/\/.*\binstrucciones\b/i.test(line)) hasInst = true;
+        
+        let lineNoQuotes = line.replace(/"(?:\\.|[^"\\])*"/g, '""').replace(/\/\/.*$/, '').toLowerCase();
+        
+        if (/\bsino\b/.test(lineNoQuotes)) {
+            errors.push(`<b>Línea ${lineNum}:</b> Encontré "sino". 💡 <i>Cámbialo por "de otro modo" o "de otro modo si".</i>`);
+        }
+        if (/\b(inicio|final)\b/.test(lineNoQuotes)) {
+            errors.push(`<b>Línea ${lineNum}:</b> Encontré "inicio" o "final". 💡 <i>En este estándar no se usan, bórralos y asegúrate de abrir/cerrar llaves { }.</i>`);
+        }
+        if (/\breal\b/.test(lineNoQuotes)) {
+            errors.push(`<b>Línea ${lineNum}:</b> Encontré "real". 💡 <i>El tipo de dato correcto es "flotante".</i>`);
+        }
+        
+        if (lineNoQuotes.includes('{')) openBraces += (lineNoQuotes.match(/{/g) || []).length;
+        if (lineNoQuotes.includes('}')) closeBraces += (lineNoQuotes.match(/}/g) || []).length;
+        
+        if (!line.startsWith('//') && !line.endsWith(';') && !line.endsWith('{') && !line.endsWith('}')) {
+            if (!/^(si|de otro modo|para|Algoritmo)\b/i.test(lineNoQuotes)) {
+                errors.push(`<b>Línea ${lineNum}:</b> 💡 <i>Posible falta de punto y coma (;) al final de la instrucción.</i>`);
+            }
+        }
+    }
+    
+    if (openBraces !== closeBraces) errors.push(`<b>Global:</b> 💡 <i>Las llaves no coinciden. Tienes ${openBraces} '{' y ${closeBraces} '}'.</i>`);
+
+    if (code.trim()) {
+        if (/(?:\/|%)\s*0(?:\.0+)?(?=\s*[);])/.test(code)) errors.push('<b>Riesgo algorítmico:</b> Detecté una división o módulo entre cero. Revisa el divisor y el caso en que sea 0.');
+        const paraLines = lines.filter(line => /^\s*para\s*\(/i.test(line));
+        paraLines.forEach((line, index) => { if ((line.match(/;/g) || []).length < 2) errors.push('<b>Riesgo algorítmico:</b> La estructura para #' + (index + 1) + ' podría tener incompleto su inicio, condición o incremento.'); });
+        if (currentTask && currentTask.id !== 'clase' && Array.isArray(currentTask.tests)) {
+            let logicalFailures = 0;
+            currentTask.tests.forEach((test, index) => {
+                if (logicalFailures >= 3) return;
+                try {
+                    const assigned = alignTestInputs(code, currentTask.solution, test.in);
+                    const actual = runPseudo(code, assigned.values);
+                    if (!validateOutput(actual, test.out, code)) {
+                        logicalFailures++;
+                        errors.push('<b>Posible error lógico (caso ' + (index + 1) + '):</b> salida "' + escapeHTML(actual.join(' | ') || '(sin salida)') + '"; se esperaba "' + escapeHTML(test.out.join(' | ')) + '". Revisa condiciones, fórmulas, orden de operaciones y límites.');
+                    }
+                } catch (err) { errors.push('<b>Posible error de ejecución:</b> ' + escapeHTML(err.message)); }
+            });
+        } else if (currentTask && currentTask.id === 'clase' && $('classInputs') && $('classInputs').value.trim()) {
+            try { runPseudo(code, parseInputValues($('classInputs').value)); }
+            catch (err) { errors.push('<b>Error de ejecución con tus datos:</b> ' + escapeHTML(err.message)); }
+            if (!$('classExpected').value.trim()) errors.push('<b>Revisión lógica:</b> Añade una salida esperada para poder comparar el resultado de este enunciado libre.');
+        }
+    }
+    if (errors.length > 0) {
+        $('testsBox').innerHTML = `<div class="testcase" style="border-color: rgba(245,158,11,0.5);">
+            <h3 style="color: var(--warning); margin-top:0;">🔍 Reporte de Análisis</h3>
+            <ul style="list-style:none; padding:0;">
+                <li style="margin-bottom: 10px;">${errors.join('</li><li style="margin-bottom: 10px;">')}</li>
+            </ul>
+        </div>`;
+        $('feedback').className = 'feedback warning';$('feedback').innerText = '🔍 Se encontraron posibles errores de sintaxis, lógica o algoritmo. Revisa el reporte.';
+    } else {
+        $('testsBox').innerHTML = '';
+        $('feedback').className = 'feedback good';$('feedback').innerText = '✅ No encontré errores de sintaxis ni diferencias en los casos conocidos. Prueba también datos límite y situaciones especiales.';
+    }
+});
+
+$('answer').addEventListener('input', () => { runtimeReady = false; if ($('runtimePanel')) $('runtimePanel').style.display = 'none'; if ($('activityMode').value !== 'code' && currentTask) renderDeskTable(); });
+$('activityMode').addEventListener('change', applyActivityMode);
+$('deskCase').addEventListener('change', () => {
+    if (currentTask && currentTask.id !== 'clase') {
+        const test = currentTask.tests[Number($('deskCase').value)];
+        if (test) $('deskInputs').value = test.in.join(', ');
+    }
+});
+$('prepareDesk').addEventListener('click', () => {
+    const source = $('answer').value;
+    const inputsText = currentTask.id === 'clase' ? $('classInputs').value : $('deskInputs').value;
+    try {
+        if (!source.trim()) throw new Error('Escribe tu algoritmo primero; la prueba de escritorio no proporciona soluciones.');
+        const inputs = parseInputValues(inputsText);
+        const output = runPseudo(source, inputs);
+        const vars = declaredDeskVariables(source);
+        if (!vars.length) throw new Error('Declara primero las variables en tu bloque declarativo para crear las columnas de memoria.');
+        const traceRows = buildDeskTrace(source, inputs, output);
+        const width = vars.length + 4, declarationRow = Array(width).fill(''), initialRow = Array(width).fill('');
+        declarationRow[0] = '1'; vars.forEach((name, i) => declarationRow[i + 1] = name);
+        initialRow[0] = '2'; vars.forEach((_, i) => initialRow[i + 1] = '?');
+        deskWork[currentDeskKey()] = [declarationRow, initialRow, ...traceRows];
+        localStorage.setItem('dlapro_deskwork', JSON.stringify(deskWork));
+        renderDeskTable();
+        $('deskFeedback').className = 'feedback good';
+        $('deskFeedback').innerText = 'Algoritmo ejecutado. Las columnas de memoria corresponden a tus ' + vars.length + ' variables; los datos que se leen se propagan y los valores desconocidos aparecen como ?. Edita la tabla si tu profesor usa otro formato.';
+    } catch (error) {
+        $('deskFeedback').className = 'feedback bad';
+        $('deskFeedback').innerText = 'No se pudo preparar la prueba: ' + error.message + (currentTask.id === 'clase' ? ' Ingresa datos de prueba en Configuración.' : ' Revisa el algoritmo y los datos.');
+    }
+});$('addDeskRow').addEventListener('click', () => {
+    const key = currentDeskKey();
+    const rows = Array.isArray(deskWork[key]) ? deskWork[key] : Array.from({length:8}, () => Array(declaredDeskVariables($('answer').value).length + 4).fill(''));
+    rows.push(Array(declaredDeskVariables($('answer').value).length + 4).fill(''));
+    deskWork[key] = rows;
+    localStorage.setItem('dlapro_deskwork', JSON.stringify(deskWork));
+    renderDeskTable();
+});
+$('clearDesk').addEventListener('click', () => {
+    const key = currentDeskKey();
+    deskWork[key] = Array.from({length:8}, () => Array(declaredDeskVariables($('answer').value).length + 4).fill(''));
+    localStorage.setItem('dlapro_deskwork', JSON.stringify(deskWork));
+    $('deskFeedback').className = 'feedback neutral';
+    $('deskFeedback').innerText = 'La tabla está lista para tus datos; si necesitas más filas, usa Agregar renglón.';
+    renderDeskTable();
+});
+
+$('check').addEventListener('click', () => {
+    let src = $('answer').value;
+    
+    if (!src.includes('{') || !src.includes('}')) {
+        $('feedback').className = 'feedback bad';$('feedback').innerText = '❌ Faltan llaves. Toca en "Analizar Error" para más detalles.';
+        return;
+    }
+    
+    if (currentTask.id === 'clase') {
+        const inputStr = $('classInputs').value;
+        const inputs = inputStr.split(',').map(s => {
+            const val = s.trim();
+            if (val === '') return '';
+            if (isNaN(val)) return val.replace(/^['"]|['"]$/g, '');
+            return Number(val);
+        }).filter(s => s !== '');
+        const expectedText = $('classExpected').value.trim();
+        const expected = expectedText ? expectedText.split('|').map(value => value.trim()).filter(Boolean) : [];
+
+        try {
+            const actual = runPseudo(src, inputs);
+            const passed = expected.length ? validateOutput(actual, expected, src) : null;
+            const outHTML = actual.length ? actual.map(escapeHTML).join('<br>') : '<i>(El programa no imprimió nada)</i>';
+            const statusHTML = passed === null
+                ? '<b style="color:var(--good)">✅ Ejecución sin errores</b>'
+                : passed
+                    ? '<b style="color:var(--good)">✅ Correcto: la salida coincide con lo esperado</b>'
+                    : '<b style="color:var(--bad)">❌ Incorrecto: la salida no coincide con lo esperado</b>';
+            $('testsBox').innerHTML = `<div class="testcase" style="border-color: ${passed === false ? 'rgba(239,68,68,0.4)' : 'rgba(16,185,129,0.4)'};">
+                ${statusHTML}<br>
+                <span style="color: var(--muted)">Datos de entrada procesados:</span> [${escapeHTML(inputs.join(', '))}]<br><br>
+                ${expected.length ? `<span style="color: var(--muted)">Salida esperada:</span> ${escapeHTML(expected.join(' | '))}<br>` : ''}
+                <span style="color: var(--muted)">Salida del programa:</span><br>
+                <span style="color: white; font-size: 15px;">${outHTML}</span>
+            </div>`;
+            if (passed === false) {
+                $('feedback').className = 'feedback bad';
+                $('feedback').innerText = '❌ El algoritmo se ejecutó, pero el resultado no coincide con la salida esperada. Revisa la lógica.';
+            } else if (passed === true) {
+                $('feedback').className = 'feedback good';
+                $('feedback').innerText = '✅ ¡Correcto! El algoritmo se ejecutó y produjo la salida esperada.';
+            } else {
+                $('feedback').className = 'feedback neutral';
+                $('feedback').innerText = 'El algoritmo se ejecutó sin errores. Para validar el resultado, agrega una salida esperada; un enunciado libre no incluye casos de referencia automáticos.';
+            }
+        } catch(e) {
+            $('testsBox').innerHTML = `<div class="testcase" style="border-color: rgba(239,68,68,0.4);">
+                <b style="color:var(--bad)">❌ No se pudo ejecutar</b><br>
+                <span style="color:var(--bad)">${escapeHTML(e.message)}</span>
+            </div>`;
+            $('feedback').className = 'feedback bad';
+            $('feedback').innerText = '❌ Revisa la sintaxis o los datos de entrada. Si el algoritmo usa leer(), ingresa valores de prueba en orden.';
+        }
+        return;
+    }
+
+    let testsHTML = '';
+    let passed = 0;
+    
+    for (let i = 0; i < currentTask.tests.length; i++) {
+        let test = currentTask.tests[i];
+        let actual = [];
+        let ok = false;
+        let errMsg = '';
+        
+        let assigned = { values: test.in.slice(), reads: extractReadVariables(src) };
+        try {
+            assigned = alignTestInputs(src, currentTask.solution, test.in);
+            actual = runPseudo(src, assigned.values);
+            ok = validateOutput(actual, test.out, src);
+        } catch(e) {
+            errMsg = e.message;
+        }
+        
+        if(ok) passed++;
+        
+        testsHTML += `
+        <div class="testcase" style="border-color: ${ok ? 'rgba(16,185,129,0.4)' : 'rgba(239,68,68,0.4)'};">
+            <b style="color: ${ok ? 'var(--good)' : 'var(--bad)'}">Caso ${i+1}: ${ok ? '✅ Éxito' : '❌ Falló'}</b><br>
+            <span style="color: var(--muted)">Datos por variable:</span> ${escapeHTML(inputAssignmentLabel(assigned.reads, assigned.values))}<br>
+            <span style="color: var(--muted)">Resultado Esperado:</span> ${escapeHTML(test.out.join(' '))}<br>
+            <span style="color: var(--muted)">Tu Algoritmo Imprimió:</span> ${errMsg ? '<span style="color:var(--bad)">'+escapeHTML(errMsg)+'</span>' : (actual.length ? actual.map(escapeHTML).join(' | ') : '<i>nada</i>')}
+        </div>`;
+    }
+    
+    $('testsBox').innerHTML = '<h3>Resultados Lógicos</h3>' + testsHTML;
+    
+    if (passed === currentTask.tests.length) {
+        runtimeReady = true;
+        prepareRuntimeConsole(src);
+        $('runtimePanel').style.display = 'block';
+        $('feedback').className = 'feedback good';$('feedback').innerText = `🚀 ¡Lógica perfecta! Pasaste los ${passed} casos de prueba matemáticos.`;
+        const wasSolved = solved.includes(currentTask.id);
+        if (!wasSolved) {
+            solved.push(currentTask.id);
+            points += 15;
+        }
+        savedAnswers[currentTask.id] = src;
+        localStorage.setItem('dlapro_points', points);
+        localStorage.setItem('dlapro_solved', JSON.stringify(solved));
+        localStorage.setItem('dlapro_answers', JSON.stringify(savedAnswers));
+        $('clearAnswer').style.display = 'block';
+        updateStats();
+        renderTaskList();
+        $('feedback').innerText = `🚀 ¡Lógica perfecta! Pasaste los ${passed} casos de prueba. Tu respuesta quedó guardada en este reto.`;
+    } else {
+        runtimeReady = false;
+        $('runtimePanel').style.display = 'none';
+        $('feedback').className = 'feedback bad';$('feedback').innerText = `⚠️ La lógica falló. Toca "Analizar Error" para ver si es problema de escritura, o revisa tus matemáticas si la sintaxis está bien.`;
+    }
+});
+
+$('newTask').addEventListener('click', loadTask);$('level').addEventListener('change', loadTask);
+$('resetProgress').addEventListener('click', () => {
+    if (!confirm('¿Reiniciar tus puntos y problemas dominados? Esta acción no se puede deshacer.')) return;
+    points = 0; solved = [];
+    localStorage.removeItem('dlapro_points'); localStorage.removeItem('dlapro_solved'); localStorage.removeItem('dlapro_answers'); localStorage.removeItem('dlapro_deskwork');
+    savedAnswers = {}; deskWork = {};
+    updateStats(); loadTask();
+});
+
+$('clearAnswer').addEventListener('click', () => {
+    if (!currentTask || currentTask.id === 'clase' || !savedAnswers[currentTask.id]) return;
+    if (!confirm('¿Borrar el código guardado de este reto? Se conservará el check de completado y tus puntos.')) return;
+    delete savedAnswers[currentTask.id];
+    localStorage.setItem('dlapro_answers', JSON.stringify(savedAnswers));
+    $('answer').value = '';
+    $('deskInputs').value = '';
+    runtimeReady = false;
+    $('runtimePanel').style.display = 'none';
+    $('clearAnswer').style.display = 'none';
+    $('testsBox').innerHTML = '';
+    $('feedback').className = 'feedback neutral';
+    $('feedback').innerText = 'Respuesta guardada borrada. El reto sigue marcado como completado; puedes resolverlo otra vez cuando quieras.';
+    renderTaskList();
+});
+
+$('hint').addEventListener('click', () => {
+    $('feedback').className = 'feedback neutral';$('feedback').innerText = '💡 Pista: ' + currentTask.hint;
+});
+
+function addInputPrompts(solution) {
+    return solution.replace(/^([ \t]*)leer\(\s*([A-Za-z_]\w*)\s*(?:\[\s*([A-Za-z_]\w*|\d+)\s*\])?\s*\);/gm, (_, indent, variable, index) => {
+        const readable = variable.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/\d+/g, ' $&').trim();
+        const label = readable.charAt(0).toUpperCase() + readable.slice(1);
+        const target = `${variable}${index ? `[${index}]` : ''}`;
+        return `${indent}imprimir("Ingrese ${label}${index ? ` ${index}` : ''}:");\n${indent}leer(${target});`;
+    });
+}
+
+$('solution').addEventListener('click', () => {
+    if (currentTask.id === 'clase') {
+        let stmt = $('classStatement').value;
+        if(!stmt.trim()) {
+            $('feedback').className = 'feedback bad';$('feedback').innerText = '⚠️ Escribe primero el enunciado del profesor para poder pedirle la solución a la IA.';
+            return;
+        }
+        let promptText = `Hola, ayúdame a resolver este problema de DLA en pseudocódigo. Debe cumplir ESTRICTAMENTE con estas reglas:\n- Usar llaves { }, NADA de palabras "inicio" ni "final".\n- Variables permitidas: entero, flotante, cadena, caracter, logico.\n- Palabras clave: si, de otro modo si, de otro modo (NUNCA usar "sino").\n- Ciclos: para.\n- Comandos: imprimir(), leer().\n- Puede incluir comentarios para separar la declaración de variables y las instrucciones; no exijas frases exactas.\n- Antes de cada leer(variable), escribe imprimir("Ingrese ...:") con el nombre descriptivo del dato.\n- Respeta la sangría dentro de condicionales y ciclos.\n\nAquí tienes el enunciado:\n"${stmt}"`;
+        
+        navigator.clipboard.writeText(promptText).then(() => {
+            $('feedback').className = 'feedback good';$('feedback').innerText = '📋 ¡Instrucción copiada al portapapeles! \n\nRegresa al chat con Gemini, pega el texto que acabo de copiar y te enviará la solución exacta con tus reglas.';
+        }).catch(err => {
+            $('feedback').className = 'feedback warning';$('feedback').innerText = '⚠️ No se pudo copiar automáticamente. Pídele directamente a la IA que te resuelva el problema con las reglas de clase.';
+        });
+    } else {
+        const existingCode = $('answer').value.replace(/\/\/.*$/gm, '').trim();
+        if (existingCode && !confirm('Ver la solución reemplazará el código que escribiste. ¿Quieres continuar?')) return;
+        $('answer').value = currentTask.solution ? addInputPrompts(currentTask.solution) : '// Ocurrió un error al cargar la solución.';
+        runtimeReady = false;
+        $('runtimePanel').style.display = 'none';
+        $('feedback').className = 'feedback warning';$('feedback').innerText = '👀 Solución cargada con mensajes de entrada y bloques de comentarios completos. Revisa cada paso y compara con tu intento.';
+    }
+});
+
+updateStats();
+loadTask();
+</script>
+</body>
+</html>
