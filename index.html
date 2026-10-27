@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DLA Pro - Simulador Lógico v11</title>
+<title>DLA Pro - Simulador Lógico v12</title>
 <style>
 :root {
   --bg: #0f172a;
@@ -123,8 +123,8 @@ button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-
 <body>
 <header>
   <div class="wrap">
-    <h1>🚀 DLA Pro <span style="font-weight:400; font-size: 20px;">| Simulador Lógico v11</span></h1>
-    <p>114 retos, funciones, práctica para principiantes y prueba de escritorio.</p>
+    <h1>🚀 DLA Pro <span style="font-weight:400; font-size: 20px;">| Simulador Lógico v12</span></h1>
+    <p>150 retos, funciones, práctica para principiantes y prueba de escritorio.</p>
     <div class="stats">
       <div class="stat">⭐ Puntos: <span id="points">0</span></div>
       <div class="stat">✅ Dominados: <span id="solved">0</span></div>
@@ -243,7 +243,7 @@ button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-
   </section>
 </main>
 <script>
-// BASE DE DATOS: 114 PROBLEMAS (70 originales + 25 nuevos + 19 de funciones)
+// BASE DE DATOS: 150 PROBLEMAS (114 anteriores + 36 nuevos)
 const tasks = [
 // NIVEL 1: Variables y Operaciones (1-10)
 {id:1, l:1, title:'Calcular Promedio', statement:'Lee tres notas (flotantes) y calcula el promedio. Imprime el resultado.', vars:'flotante nota1, nota2, nota3, promedio', hint:'promedio = (nota1 + nota2 + nota3) / 3', solution:'Algoritmo Promedio\n{\n    //Bloque declarativo de variables\n    flotante nota1, nota2, nota3, promedio;\n    //Bloque de instrucciones\n    leer(nota1);\n    leer(nota2);\n    leer(nota3);\n    promedio = (nota1 + nota2 + nota3) / 3;\n    imprimir(promedio);\n}', tests:[{in:[80,90,100], out:['90']}]},
@@ -390,6 +390,49 @@ const newTasks = [
 
 tasks.push(...newTasks);
 
+// Colección incremental: ejercicios nuevos, redactados para añadir contexto y objetivo claro.
+const q=(id,l,title,statement,decl,body,tests)=>makeProblem(id,l,title,statement,decl.replace(/\b(entero|flotante|cadena|caracter|logico)\s+/g,''),`Identifica entradas, proceso y salida; cuida los límites indicados.`,title.replace(/[^A-Za-z0-9]/g,''),`    ${decl}`,`    ${body}`,[...tests]);
+const additions=[
+q(115,1,'Costo de fotocopias','Un centro de copiado cobra B/.0.05 por página y B/.0.20 por cada trabajo. Recibe la cantidad de páginas e informa el costo.','entero paginas; flotante costo;','leer(paginas);\ncosto = paginas * 0.05 + 0.20;\nimprimir(costo);',[{in:[20],out:['1.2']},{in:[100],out:['5.2']}]),
+q(116,1,'Tiempo de viaje en minutos','Una aplicación recibe una duración en minutos y la desglosa en horas completas y minutos restantes.','entero minutos, horas, resto;','leer(minutos);\nhoras = minutos / 60;\nresto = minutos % 60;\nimprimir(horas);\nimprimir(resto);',[{in:[135],out:['2','15']},{in:[60],out:['1','0']}]),
+q(117,1,'Rendimiento de combustible','Una conductora registra distancia recorrida y litros consumidos. Calcula los kilómetros por litro.','flotante kilometros, litros, rendimiento;','leer(kilometros);\nleer(litros);\nrendimiento = kilometros / litros;\nimprimir(rendimiento);',[{in:[360,30],out:['12']},{in:[225,15],out:['15']}]),
+q(118,1,'Reparto de cuenta','Un grupo divide el costo de una comida en partes iguales. Recibe el total y la cantidad de personas, e informa el aporte individual.','entero personas; flotante total, aporte;','leer(total);\nleer(personas);\naporte = total / personas;\nimprimir(aporte);',[{in:[84,4],out:['21']},{in:[55.5,3],out:['18.5']}]),
+q(119,1,'Pago por estacionamiento','Un estacionamiento cobra B/.1.75 por cada hora de uso. Calcula el importe a partir de las horas registradas.','entero horas; flotante pago;','leer(horas);\npago = horas * 1.75;\nimprimir(pago);',[{in:[2],out:['3.5']},{in:[5],out:['8.75']}]),
+q(120,1,'Edad expresada en meses','Una aplicación de salud recibe años cumplidos y estima la edad equivalente en meses.','entero anos, meses;','leer(anos);\nmeses = anos * 12;\nimprimir(meses);',[{in:[18],out:['216']},{in:[25],out:['300']}]),
+q(121,2,'Elegibilidad para una beca','Una institución ofrece una beca a estudiantes con promedio mínimo de 90. Comunica si se cumple el requisito.','flotante promedio;','leer(promedio);\nsi(promedio >= 90) {\n imprimir("Puede solicitar la beca");\n} de otro modo {\n imprimir("No cumple el promedio");\n}',[{in:[90],out:['Puede solicitar la beca']},{in:[89.9],out:['No cumple el promedio']}]),
+q(122,2,'Alerta de congelación','Un sensor de exterior registra una temperatura. Advierte congelación si está en cero o menos; de lo contrario indica que está sobre cero.','flotante temperatura;','leer(temperatura);\nsi(temperatura <= 0) {\n imprimir("Congelacion");\n} de otro modo {\n imprimir("Sobre cero");\n}',[{in:[0],out:['Congelacion']},{in:[4.5],out:['Sobre cero']}]),
+q(123,2,'Validación de inventario','Una bodega registra unidades disponibles. Rechaza cantidades negativas y acepta cero o cantidades positivas.','entero unidades;','leer(unidades);\nsi(unidades >= 0) {\n imprimir("Registro aceptado");\n} de otro modo {\n imprimir("Cantidad no valida");\n}',[{in:[0],out:['Registro aceptado']},{in:[-2],out:['Cantidad no valida']}]),
+q(124,2,'Cargo por exceso de equipaje','Una aerolínea permite equipaje de hasta 23 kg sin cargo. Cobra B/.4 por cada kilogramo sobre el límite.','flotante peso, cargo;','leer(peso);\nsi(peso > 23) {\n cargo = (peso - 23) * 4;\n} de otro modo {\n cargo = 0;\n}\nimprimir(cargo);',[{in:[25],out:['8']},{in:[20],out:['0']}]),
+q(125,2,'Acceso a evaluación','Para ingresar a una evaluación, el estudiante debe tener matrícula activa y saldo pendiente igual a cero.','flotante saldo; cadena matricula;','leer(saldo);\nleer(matricula);\nsi(saldo == 0 && matricula == "activa") {\n imprimir("Puede ingresar");\n} de otro modo {\n imprimir("Debe regularizar su situacion");\n}',[{in:[0,'activa'],out:['Puede ingresar']},{in:[0,'inactiva'],out:['Debe regularizar su situacion']},{in:[15,'activa'],out:['Debe regularizar su situacion']}]),
+q(126,2,'Validación de lados','Un programa recibe tres longitudes y determina si pueden formar un triángulo: cada par de lados debe superar al lado restante.','flotante lado1, lado2, lado3;','leer(lado1);\nleer(lado2);\nleer(lado3);\nsi(lado1 + lado2 > lado3 && lado1 + lado3 > lado2 && lado2 + lado3 > lado1) {\n imprimir("Triangulo valido");\n} de otro modo {\n imprimir("Triangulo no valido");\n}',[{in:[3,4,5],out:['Triangulo valido']},{in:[1,2,3],out:['Triangulo no valido']}]),
+q(127,3,'Beneficio por compra y membresía','Una tienda da 15% de descuento desde B/.200 a miembros. Si no aplica, ofrece 8% a miembros o compras de B/.100 en adelante; los demás no reciben descuento.','flotante monto, descuento, total; cadena miembro;','leer(monto);\nleer(miembro);\nsi(monto >= 200 && miembro == "si") { descuento = 0.15; } de otro modo si(monto >= 100 || miembro == "si") { descuento = 0.08; } de otro modo { descuento = 0; }\ntotal = monto - monto * descuento;\nimprimir(total);',[{in:[200,'si'],out:['170']},{in:[150,'no'],out:['138']},{in:[50,'no'],out:['50']}]),
+q(128,3,'Autorización de préstamo','Una cooperativa aprueba solicitudes si los ingresos son al menos B/.800 y no existen atrasos, o si se presenta una garantía aprobada.','flotante ingreso; cadena atrasos, garantia;','leer(ingreso);\nleer(atrasos);\nleer(garantia);\nsi((ingreso >= 800 && atrasos == "no") || garantia == "si") { imprimir("Solicitud aprobada"); } de otro modo { imprimir("Solicitud pendiente"); }',[{in:[900,'no','no'],out:['Solicitud aprobada']},{in:[900,'si','no'],out:['Solicitud pendiente']},{in:[300,'si','si'],out:['Solicitud aprobada']}]),
+q(129,3,'Alerta de mantenimiento','Un equipo requiere revisión si supera 500 horas de uso, o si presenta alerta crítica junto con temperatura mayor de 80 grados.','entero horas; flotante temperatura; cadena alerta;','leer(horas);\nleer(temperatura);\nleer(alerta);\nsi(horas > 500 || (alerta == "critica" && temperatura > 80)) { imprimir("Programar mantenimiento"); } de otro modo { imprimir("Equipo operativo"); }',[{in:[501,40,'no'],out:['Programar mantenimiento']},{in:[300,85,'critica'],out:['Programar mantenimiento']},{in:[300,85,'normal'],out:['Equipo operativo']}]),
+q(130,3,'Tarifa de envío','Una tienda ofrece envío gratis en pedidos desde B/.75, o en pedidos desde B/.40 para la zona local. En otro caso cobra B/.6.','flotante pedido; cadena zona;','leer(pedido);\nleer(zona);\nsi(pedido >= 75 || (zona == "local" && pedido >= 40)) { imprimir("Envio gratis"); } de otro modo { imprimir("Cargo de envio: 6"); }',[{in:[80,'otra'],out:['Envio gratis']},{in:[50,'local'],out:['Envio gratis']},{in:[50,'otra'],out:['Cargo de envio: 6']}]),
+q(131,3,'Prioridad de solicitudes','Una solicitud es prioritaria si tiene puntuación de 80 o más y está completa, o si cuenta con recomendación institucional.','entero puntaje; cadena completa, recomendacion;','leer(puntaje);\nleer(completa);\nleer(recomendacion);\nsi((puntaje >= 80 && completa == "si") || recomendacion == "si") { imprimir("Prioritaria"); } de otro modo { imprimir("En revision"); }',[{in:[85,'si','no'],out:['Prioritaria']},{in:[70,'no','si'],out:['Prioritaria']},{in:[85,'no','no'],out:['En revision']}]),
+q(132,3,'Tarifa preferencial de transporte','El pasajero recibe tarifa reducida si es estudiante o tiene al menos 60 años y porta tarjeta de adulto mayor.','entero edad; cadena estudiante, tarjeta;','leer(edad);\nleer(estudiante);\nleer(tarjeta);\nsi(estudiante == "si" || (edad >= 60 && tarjeta == "si")) { imprimir("Tarifa reducida"); } de otro modo { imprimir("Tarifa regular"); }',[{in:[20,'si','no'],out:['Tarifa reducida']},{in:[60,'no','si'],out:['Tarifa reducida']},{in:[60,'no','no'],out:['Tarifa regular']}]),
+q(133,4,'Conteo de temperaturas elevadas','Un laboratorio registra seis temperaturas y cuenta cuántas superan los 37.5 grados.','entero i, altas; flotante temperatura;','altas = 0;\npara(i = 1; i <= 6; i = i + 1) { leer(temperatura); si(temperatura > 37.5) { altas = altas + 1; } }\nimprimir(altas);',[{in:[36,38,37.5,39,40,37],out:['3']},{in:[36,37,37,36,37,36],out:['0']}]),
+q(134,4,'Suma de donaciones hasta cero','Un sistema suma donaciones hasta recibir cero, que indica el final del registro.','flotante donacion, total;','total = 0;\nleer(donacion);\nmientras(donacion != 0) { total = total + donacion; leer(donacion); }\nimprimir(total);',[{in:[10,25,5,0],out:['40']},{in:[0],out:['0']}]),
+q(135,4,'Promedio de consumo semanal','Una oficina registra consumos de cinco días y calcula el promedio diario.','entero i; flotante consumo, suma, promedio;','suma = 0;\npara(i = 1; i <= 5; i = i + 1) { leer(consumo); suma = suma + consumo; }\npromedio = suma / 5;\nimprimir(promedio);',[{in:[10,20,30,40,50],out:['30']},{in:[8,8,8,8,8],out:['8']}]),
+q(136,4,'Conteo de múltiplos','Un estudiante ingresa ocho enteros. El programa cuenta cuántos son divisibles entre tres.','entero i, numero, multiplos;','multiplos = 0;\npara(i = 1; i <= 8; i = i + 1) { leer(numero); si(numero % 3 == 0) { multiplos = multiplos + 1; } }\nimprimir(multiplos);',[{in:[3,4,6,8,9,10,12,14],out:['4']},{in:[1,2,4,5,7,8,10,11],out:['0']}]),
+q(137,4,'Ventas hasta alcanzar la meta','La caja registra ventas hasta que el acumulado alcanza B/.100. Al terminar muestra la cantidad de ventas y el total.','entero cantidad; flotante venta, total;','total = 0;\ncantidad = 0;\nmientras(total < 100) { leer(venta); total = total + venta; cantidad = cantidad + 1; }\nimprimir(cantidad);\nimprimir(total);',[{in:[30,25,50],out:['3','105']},{in:[100],out:['1','100']}]),
+q(138,4,'Mayor calificación del grupo','Un docente registra las calificaciones de siete estudiantes e informa la mayor.','entero i; flotante nota, mayor;','para(i = 1; i <= 7; i = i + 1) { leer(nota); si(i == 1 || nota > mayor) { mayor = nota; } }\nimprimir(mayor);',[{in:[70,88,91,65,91,80,77],out:['91']},{in:[100,90,80,70,60,50,40],out:['100']}]),
+q(139,5,'Balance de caja por turnos','Una tienda inicia con un fondo y registra cinco movimientos de ingreso o egreso. Informa el saldo final.','entero i; flotante saldo, monto; cadena tipo;','leer(saldo);\npara(i = 1; i <= 5; i = i + 1) { leer(tipo); leer(monto); si(tipo == "ingreso") { saldo = saldo + monto; } de otro modo { saldo = saldo - monto; } }\nimprimir(saldo);',[{in:[100,'ingreso',50,'egreso',20,'ingreso',10,'egreso',30,'ingreso',5],out:['105']}]),
+q(140,5,'Registro de lluvia con centinela','Una estación acumula lluvias diarias y cuenta días lluviosos hasta recibir cero, que cierra el registro.','entero dias; flotante lluvia, total;','total = 0;\ndias = 0;\nleer(lluvia);\nmientras(lluvia > 0) { total = total + lluvia; dias = dias + 1; leer(lluvia); }\nimprimir(dias);\nimprimir(total);',[{in:[2,5,1,0],out:['3','8']},{in:[0],out:['0','0']}]),
+q(141,5,'Informe de resultados del grupo','Un curso registra ocho notas. Presenta el promedio y el número de estudiantes aprobados con nota mínima de 71.','entero i, aprobados; flotante nota, suma, promedio;','suma = 0;\naprobados = 0;\npara(i = 1; i <= 8; i = i + 1) { leer(nota); suma = suma + nota; si(nota >= 71) { aprobados = aprobados + 1; } }\npromedio = suma / 8;\nimprimir(promedio);\nimprimir(aprobados);',[{in:[80,70,90,60,75,85,50,90],out:['75','5']}]),
+q(142,5,'Consumo eléctrico por tramos','Una compañía cobra B/.0.08 por cada uno de los primeros 50 kWh y B/.0.12 por cada unidad adicional. Calcula la factura.','flotante consumo, factura;','leer(consumo);\nsi(consumo <= 50) { factura = consumo * 0.08; } de otro modo { factura = 4 + (consumo - 50) * 0.12; }\nimprimir(factura);',[{in:[40],out:['3.2']},{in:[70],out:['6.4']}]),
+q(143,5,'Resumen de jornadas','Una empresa registra las horas de seis personas. Informa el total de horas y cuántas superaron ocho horas.','entero i, horas, total, extendidos;','total = 0;\nextendidos = 0;\npara(i = 1; i <= 6; i = i + 1) { leer(horas); total = total + horas; si(horas > 8) { extendidos = extendidos + 1; } }\nimprimir(total);\nimprimir(extendidos);',[{in:[8,10,7,9,8,12],out:['54','3']}]),
+q(144,5,'Conteo de valores válidos','Se reciben hasta diez valores. El algoritmo cuenta los no negativos y detiene la lectura al encontrar uno negativo.','entero i, numero, cantidad;','cantidad = 0;\npara(i = 1; i <= 10; i = i + 1) { leer(numero); si(numero < 0) { i = 11; } de otro modo { cantidad = cantidad + 1; } }\nimprimir(cantidad);',[{in:[4,8,2,-1],out:['3']},{in:[1,2,3,4,5,6,7,8,9,10],out:['10']}]),
+makeFunctionProblem(145,'Área de una pieza circular','Una aplicación de diseño recibe el radio y reutiliza una función que devuelve el área circular usando 3.1416.','flotante radio, area','flotante','AreaPiezaCircular','flotante radio','    flotante area;','    area = 3.1416 * radio * radio;\n    retornar area;','    flotante radio, area;','    leer(radio);\n    area = AreaPiezaCircular(radio);\n    imprimir(area);',[{in:[2],out:['12.5664']},{in:[5],out:['78.54']}]),
+makeFunctionProblem(146,'Elegibilidad para licencia','Una oficina de tránsito necesita una función lógica que indique si una persona puede solicitar licencia desde los 18 años.','entero edad; logico elegible','logico','PuedeSolicitarLicencia','entero edad','    logico elegible;','    elegible = edad >= 18;\n    retornar elegible;','    entero edad;\n    logico elegible;','    leer(edad);\n    elegible = PuedeSolicitarLicencia(edad);\n    si(elegible) { imprimir("Puede iniciar el tramite"); } de otro modo { imprimir("Aun no cumple la edad"); }',[{in:[18],out:['Puede iniciar el tramite']},{in:[17],out:['Aun no cumple la edad']}]),
+makeFunctionProblem(147,'Pago de estacionamiento con cuota fija','Un estacionamiento cobra B/.1.25 por hora más B/.0.50 de cuota fija. La función recibe las horas y devuelve el costo.','entero horas; flotante pago','flotante','CostoEstacionamiento','entero horas','    flotante pago;','    pago = horas * 1.25 + 0.50;\n    retornar pago;','    entero horas;\n    flotante pago;','    leer(horas);\n    pago = CostoEstacionamiento(horas);\n    imprimir(pago);',[{in:[2],out:['3']},{in:[5],out:['6.75']}]),
+makeFunctionProblem(148,'Menor de tres mediciones','Un sistema de medición compara tres datos y necesita una función que devuelva el menor.','flotante a, b, c, menor','flotante','MenorMedicion','flotante a, flotante b, flotante c','    flotante menor;','    menor = a;\n    si(b < menor) { menor = b; }\n    si(c < menor) { menor = c; }\n    retornar menor;','    flotante a, b, c, menor;','    leer(a);\n    leer(b);\n    leer(c);\n    menor = MenorMedicion(a, b, c);\n    imprimir(menor);',[{in:[8,3,5],out:['3']},{in:[-2,0,-5],out:['-5']}]),
+makeFunctionProblem(149,'Total con envío condicional','Una tienda en línea aplica envío de B/.5 cuando el subtotal es menor de B/.100. Una función calcula el total final.','flotante subtotal, total','flotante','TotalCompraEnvio','flotante subtotal','    flotante total;','    si(subtotal >= 100) { total = subtotal; } de otro modo { total = subtotal + 5; }\n    retornar total;','    flotante subtotal, total;','    leer(subtotal);\n    total = TotalCompraEnvio(subtotal);\n    imprimir(total);',[{in:[100],out:['100']},{in:[75],out:['80']}]),
+makeFunctionProblem(150,'Pago semanal con horas adicionales','Una función recibe horas y tarifa; las primeras 40 horas se pagan normal y las horas adicionales a 1.5 veces la tarifa.','entero horas; flotante tarifa, pago','flotante','PagoSemanalExtra','entero horas, flotante tarifa','    flotante pago;','    si(horas > 40) { pago = 40 * tarifa + (horas - 40) * tarifa * 1.5; } de otro modo { pago = horas * tarifa; }\n    retornar pago;','    entero horas;\n    flotante tarifa, pago;','    leer(horas);\n    leer(tarifa);\n    pago = PagoSemanalExtra(horas, tarifa);\n    imprimir(pago);',[{in:[45,10],out:['475']},{in:[40,12],out:['480']}])
+];
+tasks.push(...additions);
+
+
 let currentTask = null;
 let runtimeReady = false;
 let points = Number.parseInt(localStorage.getItem('dlapro_points') || '0', 10) || 0;
@@ -517,7 +560,7 @@ function declaredDeskVariables(source) {
 
 function currentDeskSource() { return $('answer').value; }
 
-function buildDeskTrace(source, inputs, output) {
+function buildDeskTraceBasic(source, inputs, output) {
     const vars = declaredDeskVariables(source), width = vars.length + 4;
     const state = Object.fromEntries(vars.map(name => [name, '?']));
     const sourceLines = String(source || '').split(/\r?\n/).filter(raw => {
@@ -574,6 +617,52 @@ function buildDeskTrace(source, inputs, output) {
         rows.push(row);
     });
     return rows.length ? rows : [Array(width).fill('?')];
+}
+
+
+function buildDeskTrace(source, inputs, output) {
+    const vars = declaredDeskVariables(source), width = vars.length + 4;
+    if (/\bFuncion\s+[A-Za-z_]\w*\s*\(/i.test(source) || /^\s*(?:entero|flotante|cadena|caracter|logico)\s+[A-Za-z_]\w*\s*\(/im.test(source) || /^\s*(?:entero|flotante|cadena|caracter|logico)\s+\w+\s*\[\s*\d+\s*\]/im.test(source)) return buildDeskTraceBasic(source, inputs, output);
+    const tokens=[]; let part='', quote=false, depth=0, line=1, start=1;
+    const flush=()=>{if(part.trim())tokens.push({s:part.trim(),l:start});part='';start=line;};
+    for(let i=0;i<source.length;i++){const ch=source[i]; if(ch==='\n'){line++; if(!part.trim())start=line; if(!quote&&depth===0)flush(); continue;} if(ch==='"'&&source[i-1]!=='\\')quote=!quote; if(!quote&&ch==='/'&&source[i+1]==='/'){while(i<source.length&&source[i]!=='\n')i++;line++;if(!part.trim())start=line;flush();continue;} if(!quote){if(ch==='(')depth++;if(ch===')')depth--; if(depth===0&&(ch==='{'||ch==='}')){flush();tokens.push({s:ch,l:line});continue;} if(depth===0&&ch===';'){part+=ch;flush();continue;}} part+=ch;}
+    flush(); let p=0;
+    const error=(msg,it=tokens[p])=>{throw new Error('Línea '+(it?.l||'?')+': '+msg);};
+    const open=()=>{if(tokens[p]?.s==='{')p++;else error('se esperaba {');};
+    const block=()=>{const a=[];while(p<tokens.length){if(tokens[p].s==='}'){p++;return a;}a.push(stmt());}error('falta una llave de cierre');};
+    const split=(s)=>{let a=[],b='',q=false,d=0;for(const c of s){if(c==='"')q=!q;if(!q){if(c==='(')d++;if(c===')')d--;}if(c===','&&d===0&&!q){a.push(b.trim());b='';}else b+=c;}if(b.trim())a.push(b.trim());return a;};
+    const assignment=(text,it)=>{const normalized=text.trim().replace(/;$/,'').replace(/\)+$/,'').trim();const m=normalized.match(/^([A-Za-z_]\w*)\s*=\s*(.+)$/);if(!m)error('asignación inválida: '+text,it);return{k:m[1],e:m[2],s:normalized};};
+    function stmt(){const it=tokens[p++],s=it.s.replace(/;$/,'');let m;
+      if((m=s.match(/^(entero|flotante|cadena|caracter|logico)\s+(.+)$/i)))return{t:'d',ty:m[1].toLowerCase(),names:m[2].split(',').map(x=>x.trim()),l:it.l};
+      if((m=s.match(/^leer\s*\((.*)\)$/i)))return{t:'r',names:split(m[1]),l:it.l};
+      if((m=s.match(/^imprimir\s*\((.*)\)$/i)))return{t:'p',args:split(m[1]),l:it.l};
+      if((m=s.match(/^si\s*\((.*)\)$/i))){open();const yes=block();let no=[];if(tokens[p]&&/^(de otro modo|sino|no)$/i.test(tokens[p].s)){p++;if(tokens[p]?.s==='si') {p--;no=[stmt()];} else {open();no=block();}}else if(tokens[p]&&(m=tokens[p].s.match(/^(?:de otro modo|sino|no)\s+si\s*\((.*)\)$/i))){const alt=tokens[p++];open();const y=block();no=[{t:'i',c:m[1],yes:y,no:[],l:alt.l}];}return{t:'i',c:it.s.match(/^si\s*\((.*)\)$/i)[1],yes,no,l:it.l};}
+      if((m=s.match(/^mientras\s*\((.*)\)$/i))){open();return{t:'w',c:m[1],b:block(),l:it.l};}
+      if((m=s.match(/^para\s*\((.*)\)$/i))){const parts=m[1].split(';');if(parts.length!==3)error('para requiere inicio, condición e incremento',it);open();return{t:'f',init:assignment(parts[0],it),c:parts[1],step:assignment(parts[2],it),b:block(),l:it.l};}
+      if(/^repetir$/i.test(s)){open();const b=block(),end=tokens[p++],u=end?.s.replace(/;$/,'').match(/^hasta que\s*\((.*)\)$/i);if(!u)error('falta hasta que(...);',end);return{t:'u',c:u[1],b,l:it.l};}
+      if((m=s.match(/^([A-Za-z_]\w*)\s*=\s*(.+)$/)))return{t:'a',k:m[1],e:m[2],l:it.l};
+      if(/^Algoritmo\b/i.test(s))error('solo debe existir un algoritmo principal',it);error('instrucción no reconocida: '+s,it);
+    }
+    while(p<tokens.length&&!/^Algoritmo\b/i.test(tokens[p].s))p++;
+    if(p>=tokens.length)return buildDeskTraceBasic(source,inputs,output);
+    p++;open();const ast=block();const state=Object.create(null),types=Object.create(null),events=[];let inputIndex=0,steps=0;
+    const ev=(expr,cond=false)=>{let js=expr.replace(/\.AND\./gi,'&&').replace(/\.OR\./gi,'||').replace(/\.NOT\./gi,'!').replace(/<>/g,'!=').replace(/\bverdadero\b/gi,'true').replace(/\bfalso\b/gi,'false');if(cond)js=js.replace(/(^|[^<>!=])=(?!=)/g,'$1==');try{return Function('v','with(v){return('+js+')}')(state);}catch(e){throw new Error('No se pudo evaluar «'+expr+'»: '+e.message);}};
+    const record=(node,mem={},arith='',logic='',screen='')=>{if(++steps>20000)throw new Error('Ejecución detenida: más de 20,000 pasos. Revisa el ciclo.');events.push({n:node.l,mem,arith,logic,screen});};
+    const set=(name,value)=>{if(!(name in state))throw new Error('variable «'+name+'» no declarada');const ty=types[name];state[name]=ty==='entero'?Math.trunc(Number(value)):ty==='flotante'?Number(value):ty==='logico'?!!value:String(value);};
+    const exec=(nodes,depth=0)=>{if(depth>100)throw new Error('Se excedió el anidamiento de ciclos.');for(const n of nodes){
+      if(n.t==='d'){const names=n.names.map(x=>x.match(/^([A-Za-z_]\w*)/)).filter(Boolean).map(x=>x[1]);for(const k of names){state[k]=null;types[k]=n.ty;}record(n,Object.fromEntries(names.map(k=>[k,k])));record(n,Object.fromEntries(names.map(k=>[k,'?'])));}
+      else if(n.t==='r'){for(const k of n.names){if(inputIndex>=inputs.length)throw new Error('Falta el dato de entrada para '+k+'.');const value=inputs[inputIndex++];set(k,value);record(n,{[k]:state[k]},'', '',String(value)+' ↵');}}
+      else if(n.t==='p'){const value=n.args.map(x=>ev(x)).join(' ');record(n,{},'','',value);}
+      else if(n.t==='a'){const value=ev(n.e);set(n.k,value);record(n,{[n.k]:state[n.k]},n.k+' = '+n.e+' → '+state[n.k]);}
+      else if(n.t==='i'){const ok=!!ev(n.c,true);record(n,{},'', '('+n.c+') → '+(ok?'verdadero':'falso'));exec(ok?n.yes:n.no,depth+1);}
+      else if(n.t==='w'){let guard=0;while(!!ev(n.c,true)){record(n,{},'', '('+n.c+') → verdadero');exec(n.b,depth+1);if(++guard>20000)throw new Error('Posible bucle infinito en mientras.');}record(n,{},'', '('+n.c+') → falso');}
+      else if(n.t==='f'){set(n.init.k,ev(n.init.e));record(n,{[n.init.k]:state[n.init.k]},n.init.s);let guard=0;while(!!ev(n.c,true)){record(n,{},'', '('+n.c+') → verdadero');exec(n.b,depth+1);set(n.step.k,ev(n.step.e));record(n,{[n.step.k]:state[n.step.k]},n.step.s);if(++guard>20000)throw new Error('Posible bucle infinito en para.');}record(n,{},'', '('+n.c+') → falso');}
+      else if(n.t==='u'){let guard=0;do{exec(n.b,depth+1);const ok=!!ev(n.c,true);record(n,{},'', 'hasta que ('+n.c+') → '+(ok?'verdadero':'falso'));if(ok)break;if(++guard>20000)throw new Error('Posible bucle infinito en repetir.');}while(true);}
+    }};
+    exec(ast);
+    const carry=Object.fromEntries(vars.map(k=>[k,'?']));
+    const rows=events.map((event,i)=>{Object.assign(carry,event.mem);const row=Array(width).fill('');row[0]=String(i+3);vars.forEach((k,j)=>row[j+1]=String(carry[k]??'?'));row[vars.length+1]=event.arith;row[vars.length+2]=event.logic;row[vars.length+3]=event.screen;return row;});
+    return rows.length?rows:[Array(width).fill('')];
 }
 
 function renderDeskTable() {
@@ -1076,7 +1165,7 @@ $('prepareDesk').addEventListener('click', () => {
         localStorage.setItem('dlapro_deskwork', JSON.stringify(deskWork));
         renderDeskTable();
         $('deskFeedback').className = 'feedback good';
-        $('deskFeedback').innerText = 'Algoritmo ejecutado. Las columnas de memoria corresponden a tus ' + vars.length + ' variables; los datos que se leen se propagan y los valores desconocidos aparecen como ?. Edita la tabla si tu profesor usa otro formato.';
+        $('deskFeedback').innerText = 'Traza ejecutada paso a paso (incluye las ramas y repeticiones recorridas). Las columnas de memoria corresponden a tus ' + vars.length + ' variables; los datos que se leen se propagan y los valores desconocidos aparecen como ?. Edita la tabla si tu profesor usa otro formato.';
     } catch (error) {
         $('deskFeedback').className = 'feedback bad';
         $('deskFeedback').innerText = 'No se pudo preparar la prueba: ' + error.message + (currentTask.id === 'clase' ? ' Ingresa datos de prueba en Configuración.' : ' Revisa el algoritmo y los datos.');
@@ -1277,3 +1366,4 @@ loadTask();
 </script>
 </body>
 </html>
+<!-- v12 update -->
